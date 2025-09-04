@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 import { RxAvatar } from "react-icons/rx";
+import axios from "axios";
+import { server } from "../server.js";
 
 const SignUp = () => {
   const [name, setName] = useState(""); 
@@ -15,12 +17,75 @@ const SignUp = () => {
     setAvatar(file);
   };
 
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  try {
+    // Basic validation
+    if (!name || !email || !password) {
+      alert("Please fill in all required fields");
+      return;
+    }
+    
+    if (!avatar) {
+      alert("Please select an avatar image");
+      return;
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    };
+
+    const newForm = new FormData();
+    
+    // Make sure the field name matches what your backend expects
+    newForm.append("file", avatar); // Changed from "file" to "avatar"
+    newForm.append("name", name);
+    newForm.append("email", email);
+    newForm.append("password", password);
+
+    console.log("Sending request to:", `${server}/user/create-user`);
+    
+    const response = await axios.post(`${server}/user/create-user`, newForm, config);
+    
+    console.log("Success:", response.data);
+    
+    // Handle success (redirect, show message, etc.)
+    alert("User created successfully!");
+    
+    // Reset form
+    setName("");
+    setEmail("");
+    setPassword("");
+    setAvatar(null);
+    
+  } catch (error) {
+    console.error("Error details:", error);
+    
+    if (error.response) {
+      // Server responded with error status
+      console.error("Server Error:", error.response.data);
+      alert(`Error: ${error.response.data.message || "Server error occurred"}`);
+    } else if (error.request) {
+      // Request made but no response
+      console.error("Network Error:", error.request);
+      alert("Network error. Please check your connection.");
+    } else {
+      // Something else happened
+      console.error("Error:", error.message);
+      alert("An unexpected error occurred.");
+    }
+  }
+};
+
   return (
     <div className="flex flex-col justify-center items-center h-screen space-y-8 bg-gray-100">
       <h1 className="text-4xl font-bold text-center">Register as New User</h1>
 
       <div className="bg-gray-50 shadow-lg rounded-2xl p-8 w-96">
-        <form className="flex flex-col space-y-4">
+        <form  onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <div className="flex flex-col">
             <label htmlFor="fullname" className="mb-1 font-medium">
               Full Name
