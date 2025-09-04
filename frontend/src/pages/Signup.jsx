@@ -46,14 +46,10 @@ const SignUp = () => {
     newForm.append("email", email);
     newForm.append("password", password);
 
-    console.log("Sending request to:", `${server}/user/create-user`);
     
     const response = await axios.post(`${server}/user/create-user`, newForm, config);
     
-    console.log("Success:", response.data);
-    
-    // Handle success (redirect, show message, etc.)
-    alert("User created successfully!");
+
     
     // Reset form
     setName("");
