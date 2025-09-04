@@ -23,7 +23,7 @@ const Login = () => {
               <input
                 type="email"
                 id="email"
-                autoComplete="current-name"
+                autoComplete="current-email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
