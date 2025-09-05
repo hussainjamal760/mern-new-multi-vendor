@@ -92,10 +92,10 @@ router.post(
 
         const {name , email , password , avatar} = newUser
 
-        User.create({
+        const user = await User.create({
             name , email , password , avatar
         })
-            sendToken(newUser , 201 , res)
+            sendToken(user , 201 , res)
          } catch (error) {
         
     }
