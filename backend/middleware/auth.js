@@ -1,9 +1,9 @@
 const ErrorHandler = require("../utils/errorHandler.js");
-const catchAsyncErrors = require("./catchAsyncErrors");
+const catchAsyncError = require("./catchAsyncError.js"); // Fixed: Match the actual filename
 const jwt = require("jsonwebtoken");
 const User = require("../model/userModel.js");
 
-exports.isAuthenticated = catchAsyncErrors(async(req,res,next) => {
+exports.isAuthenticated = catchAsyncError(async(req,res,next) => {
     const {token} = req.cookies;
 
     if(!token){
