@@ -1,13 +1,26 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Login from './pages/Login'
 import SignUp from './pages/Signup'
 import Activation from './pages/Activation'
-import { ToastContainer, Bounce } from 'react-toastify';
+import { ToastContainer, Bounce, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import './toast-custom.css'   // custom css import ki
+import axios from 'axios'
+import { server } from './server'
 
 const App = () => {
+  useEffect(() => {
+    axios
+      .get(`${server}/user/getuser`, { withCredentials: true })
+      .then((res) => {
+        toast.success(res.data.message);
+      })
+      .catch((err) => {
+        toast.error(err.response?.data?.message || "Something went wrong");
+      });
+  }, []);
+
   return (
     <>
       <Routes>
