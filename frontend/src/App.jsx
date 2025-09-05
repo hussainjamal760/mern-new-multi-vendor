@@ -3,14 +3,34 @@ import { Route, Routes } from 'react-router-dom'
 import Login from './pages/Login'
 import SignUp from './pages/Signup'
 import Activation from './pages/Activation'
+import { ToastContainer, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'
+import './toast-custom.css'   // custom css import ki
 
 const App = () => {
   return (
-    <Routes>
-          <Route path='/login' element={<Login/>}/>
-          <Route path='/sign-up' element={<SignUp/>}/>
-          <Route path='/activation/:activation_token' element={<Activation/>}/>
-    </Routes>
+    <>
+      <Routes>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/sign-up' element={<SignUp/>}/>
+        <Route path='/activation/:activation_token' element={<Activation/>}/>
+      </Routes>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+        toastClassName="custom-toast"  // custom class add ki
+      />
+    </>
   )
 }
 

@@ -1,0 +1,4 @@
+/* Toast ke andar jo progress bar hai uska color blue kar diya */
+.custom-toast .Toastify__progress-bar {
+  background: #2454e3 !important;
+}

@@ -95,120 +95,6 @@ router.post(
   })
 );
 
-router.post("/activation", catchAsync(async (req, res, next) => {
-  try {
-    const { activation_token } = req.body;
-    
-    console.log("🔍 Activation attempt with token:", activation_token);
-    console.log("🔑 ACTIVATION_SECRET:", process.env.ACTIVATION_SECRET);
-    
-    if (!activation_token) {
-      console.log("❌ No activation token provided");
-      return next(new ErrorHandler("Activation token is required", 400));
-    }
-
-    // Verify the token
-    const decoded = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
-    console.log("✅ Decoded token:", decoded);
-
-    if (!decoded || !decoded.userId) {
-      console.log("❌ Invalid token structure:", decoded);
-      return next(new ErrorHandler("Invalid token structure", 400));
-    }
-
-    // Find the user by ID
-    const user = await User.findById(decoded.userId);
-    console.log("👤 Found user:", user ? "Yes" : "No");
-    
-    if (!user) {
-      console.log("❌ User not found with ID:", decoded.userId);
-      return next(new ErrorHandler("User not found", 400));
-    }
-
-    // Check if user is already verified
-    if (user.isVerified) {
-      console.log("✅ User already verified");
-      return sendToken(user, 200, res);
-    }
-
-    // Update user as verified
-    user.isVerified = true;
-    await user.save();
-    console.log("✅ User verified and saved");
-
-    // Send JWT token
-    sendToken(user, 200, res);
-    
-  } catch (error) {
-    console.log("❌ Activation error:", error.name, error.message);
-    
-    if (error.name === "TokenExpiredError") {
-      return next(new ErrorHandler("Activation token has expired", 400));
-    }
-    
-    if (error.name === "JsonWebTokenError") {
-      return next(new ErrorHandler("Invalid activation token", 400));
-    }
-    
-    return next(new ErrorHandler(`Activation failed: ${error.message}`, 500));
-  }
-}));
-
-// Add these test routes to your userController.js to verify the setup
-
-// Simple test route
-router.get("/test", (req, res) => {
-  res.json({ 
-    success: true, 
-    message: "User routes are working!",
-    path: req.path,
-    baseUrl: req.baseUrl,
-    originalUrl: req.originalUrl
-  });
-});
-
-// Test token generation and verification
-router.get("/test-token/:userId", catchAsync(async (req, res) => {
-  const userId = req.params.userId;
-  
-  console.log("🧪 Testing token for user ID:", userId);
-  
-  // Create a test token
-  const testToken = jwt.sign({ userId }, process.env.ACTIVATION_SECRET, { expiresIn: "5m" });
-  console.log("🎯 Generated test token:", testToken);
-  
-  // Immediately verify it
-  try {
-    const decoded = jwt.verify(testToken, process.env.ACTIVATION_SECRET);
-    console.log("✅ Token verification successful:", decoded);
-    
-    res.json({
-      success: true,
-      message: "Token test successful",
-      token: testToken,
-      decoded: decoded,
-      secret: process.env.ACTIVATION_SECRET
-    });
-  } catch (error) {
-    console.log("❌ Token verification failed:", error.message);
-    res.json({
-      success: false,
-      error: error.message,
-      token: testToken,
-      secret: process.env.ACTIVATION_SECRET
-    });
-  }
-}));
-
-// Test activation route with GET (for easy browser testing)
-router.get("/test-activation-get", (req, res) => {
-  res.json({ 
-    success: true, 
-    message: "Activation route is accessible",
-    envSecret: process.env.ACTIVATION_SECRET ? "Present" : "Missing"
-  });
-});
-
 // Your existing activation route with more debugging
 router.post("/activation", catchAsync(async (req, res, next) => {
   console.log("🎯 Activation route hit!");
@@ -272,5 +158,36 @@ router.post("/activation", catchAsync(async (req, res, next) => {
     return next(new ErrorHandler(`Activation failed: ${error.message}`, 500));
   }
 }));
+
+router.post(
+  "/login-user",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return next(new ErrorHandler("Please provide the all fields!", 400));
+      }
+
+      const user = await User.findOne({ email }).select("+password");
+
+      if (!user) {
+        return next(new ErrorHandler("User doesn't exists!", 400));
+      }
+
+      const isPasswordValid = await user.comparePassword(password);
+
+      if (!isPasswordValid) {
+        return next(
+          new ErrorHandler("Please provide the correct information", 400)
+        );
+      }
+
+      sendToken(user, 201, res);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
 
 module.exports = router;

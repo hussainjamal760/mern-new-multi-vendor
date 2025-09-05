@@ -4,6 +4,7 @@ import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 import { RxAvatar } from "react-icons/rx";
 import axios from "axios";
 import { server } from "../server.js";
+import { toast } from "react-toastify";
 
 const SignUp = () => {
   const [name, setName] = useState(""); 
@@ -28,7 +29,7 @@ const SignUp = () => {
     }
     
     if (!avatar) {
-      alert("Please select an avatar image");
+      toast("Please add an avatar image")
       return;
     }
 

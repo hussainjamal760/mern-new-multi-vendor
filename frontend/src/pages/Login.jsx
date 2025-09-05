@@ -1,11 +1,38 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
+import axios from "axios";
+import { server } from "../server";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
+
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    await axios
+      .post(
+        `${server}/user/login-user`,
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      )
+      .then((res) => {
+        toast.success("Login Success!");
+        navigate("/");
+        window.location.reload(true); 
+      })
+      .catch((err) => {
+        toast.error(err.response.data.message);
+      });
+  };
 
   return (
     <>
@@ -15,7 +42,7 @@ const Login = () => {
         </h1>
 
         <div className="bg-gray-50 shadow-lg rounded-2xl p-8 w-96">
-          <form className="flex flex-col space-y-4">
+          <form className="flex flex-col space-y-4" onSubmit={handleSubmit}>
             <div className="flex flex-col">
               <label htmlFor="email" className="mb-1 font-medium">
                 Email
