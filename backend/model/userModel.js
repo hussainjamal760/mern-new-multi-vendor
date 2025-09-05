@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema({
       required: true,
     },
  },
+ isVerified: {
+   type: Boolean,
+   default: false,
+ },
  createdAt:{
   type: Date,
   default: Date.now(),
@@ -63,7 +67,6 @@ const userSchema = new mongoose.Schema({
  resetPasswordToken: String,
  resetPasswordTime: Date,
 });
-
 
 //  Hash password
 userSchema.pre("save", async function (next){
