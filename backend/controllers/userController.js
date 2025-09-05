@@ -159,35 +159,48 @@ router.post("/activation", catchAsync(async (req, res, next) => {
   }
 }));
 
+// Fixed login route - replace the existing one in userController.js
+
 router.post(
   "/login-user",
-  catchAsyncErrors(async (req, res, next) => {
+  catchAsync(async (req, res, next) => {
+    console.log("🔐 Login route hit!");
+    console.log("📦 Login request body:", req.body);
+    
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return next(new ErrorHandler("Please provide the all fields!", 400));
+        return next(new ErrorHandler("Please provide all fields!", 400));
       }
 
+      // Find user and include password field
       const user = await User.findOne({ email }).select("+password");
+      console.log("👤 User found:", user ? "Yes" : "No");
 
       if (!user) {
-        return next(new ErrorHandler("User doesn't exists!", 400));
+        return next(new ErrorHandler("User doesn't exist!", 400));
+      }
+
+      // Check if user is verified
+      if (!user.isVerified) {
+        return next(new ErrorHandler("Please verify your email before logging in!", 400));
       }
 
       const isPasswordValid = await user.comparePassword(password);
+      console.log("🔑 Password valid:", isPasswordValid);
 
       if (!isPasswordValid) {
-        return next(
-          new ErrorHandler("Please provide the correct information", 400)
-        );
+        return next(new ErrorHandler("Please provide the correct information", 400));
       }
 
-      sendToken(user, 201, res);
+      console.log("✅ Login successful, sending token");
+      sendToken(user, 200, res);
+      
     } catch (error) {
+      console.log("❌ Login error:", error.message);
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
-
 module.exports = router;

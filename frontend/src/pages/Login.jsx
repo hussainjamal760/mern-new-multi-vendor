@@ -9,29 +9,57 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!email || !password) {
+      toast.error("Please fill in all fields!");
+      return;
+    }
 
-    await axios
-      .post(
+    try {
+      setLoading(true);
+      toast.info("Logging you in...");
+      
+      const response = await axios.post(
         `${server}/user/login-user`,
         {
           email,
           password,
         },
         { withCredentials: true }
-      )
-      .then((res) => {
-        toast.success("Login Success!");
+      );
+      
+      toast.success("Login successful! Welcome back! 🎉");
+      
+      // Small delay to show success message
+      setTimeout(() => {
         navigate("/");
-        window.location.reload(true); 
-      })
-      .catch((err) => {
-        toast.error(err.response.data.message);
-      });
+        window.location.reload(true);
+      }, 1000);
+      
+    } catch (err) {
+      let errorMessage = "Login failed. Please try again.";
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.status === 404) {
+        errorMessage = "Login service not available. Please try again later.";
+      } else if (err.response?.status === 500) {
+        errorMessage = "Server error. Please try again later.";
+      } else if (err.request) {
+        errorMessage = "Network error. Please check your connection.";
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,7 +82,8 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border rounded-lg px-3 py-2 focus:outline-none "
+                disabled={loading}
+                className="border rounded-lg px-3 py-2 focus:outline-none disabled:bg-gray-100"
               />
             </div>
 
@@ -69,17 +98,18 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
-                className="border rounded-lg px-3 py-2 focus:outline-none pr-10"
+                disabled={loading}
+                className="border rounded-lg px-3 py-2 focus:outline-none pr-10 disabled:bg-gray-100"
               />
               {visible ? (
                 <IoIosEye
-                  className="absolute right-3 top-9 cursor-pointer text-gray-700"
-                  onClick={() => setVisible(false)}
+                  className={`absolute right-3 top-9 text-gray-700 ${loading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  onClick={() => !loading && setVisible(false)}
                 />
               ) : (
                 <IoIosEyeOff
-                  className="absolute right-3 top-9 cursor-pointer text-gray-700"
-                  onClick={() => setVisible(true)}
+                  className={`absolute right-3 top-9 text-gray-700 ${loading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  onClick={() => !loading && setVisible(true)}
                 />
               )}
             </div>
@@ -89,18 +119,19 @@ const Login = () => {
                 <input
                   type="checkbox"
                   id="remember-me"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  disabled={loading}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:cursor-not-allowed"
                 />
                 <label
                   htmlFor="remember-me"
-                  className="font-medium text-gray-700"
+                  className={`font-medium text-gray-700 ${loading ? 'cursor-not-allowed' : ''}`}
                 >
                   Remember me
                 </label>
               </div>
               <Link
                 to="/forgot-password"
-                className="text-blue-600 hover:underline"
+                className={`text-blue-600 hover:underline ${loading ? 'pointer-events-none opacity-50' : ''}`}
               >
                 Forgot your password?
               </Link>
@@ -108,16 +139,21 @@ const Login = () => {
 
             <button
               type="submit"
-              className="mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+              disabled={loading}
+              className={`mt-4 py-2 rounded-lg transition duration-200 ${
+                loading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white`}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             <div className="text-center text-sm text-gray-600">
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <Link
                 to="/sign-up"
-                className="text-blue-600 font-medium hover:underline"
+                className={`text-blue-600 font-medium hover:underline ${loading ? 'pointer-events-none opacity-50' : ''}`}
               >
                 Sign Up
               </Link>

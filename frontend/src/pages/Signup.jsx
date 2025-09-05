@@ -12,6 +12,7 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0]; 
@@ -22,14 +23,16 @@ const SignUp = () => {
   e.preventDefault();
   
   try {
+    setLoading(true);
+    
     // Basic validation
     if (!name || !email || !password) {
-      alert("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
     
     if (!avatar) {
-      toast("Please add an avatar image")
+      toast.error("Please add an avatar image");
       return;
     }
 
@@ -41,16 +44,16 @@ const SignUp = () => {
 
     const newForm = new FormData();
     
-    // Make sure the field name matches what your backend expects
-    newForm.append("file", avatar); // Changed from "file" to "avatar"
+    newForm.append("file", avatar);
     newForm.append("name", name);
     newForm.append("email", email);
     newForm.append("password", password);
 
+    toast.info("Creating your account...");
     
     const response = await axios.post(`${server}/user/create-user`, newForm, config);
     
-
+    toast.success(response.data.message || "Account created successfully! Please check your email.");
     
     // Reset form
     setName("");
@@ -59,21 +62,18 @@ const SignUp = () => {
     setAvatar(null);
     
   } catch (error) {
-    console.error("Error details:", error);
-    
     if (error.response) {
       // Server responded with error status
-      console.error("Server Error:", error.response.data);
-      alert(`Error: ${error.response.data.message || "Server error occurred"}`);
+      toast.error(error.response.data.message || "Server error occurred");
     } else if (error.request) {
       // Request made but no response
-      console.error("Network Error:", error.request);
-      alert("Network error. Please check your connection.");
+      toast.error("Network error. Please check your connection.");
     } else {
       // Something else happened
-      console.error("Error:", error.message);
-      alert("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
     }
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -82,7 +82,7 @@ const SignUp = () => {
       <h1 className="text-4xl font-bold text-center">Register as New User</h1>
 
       <div className="bg-gray-50 shadow-lg rounded-2xl p-8 w-96">
-        <form  onSubmit={handleSubmit} className="flex flex-col space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <div className="flex flex-col">
             <label htmlFor="fullname" className="mb-1 font-medium">
               Full Name
@@ -93,7 +93,8 @@ const SignUp = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="border rounded-lg px-3 py-2 focus:outline-none"
+              disabled={loading}
+              className="border rounded-lg px-3 py-2 focus:outline-none disabled:bg-gray-100"
             />
           </div>
 
@@ -107,7 +108,8 @@ const SignUp = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="border rounded-lg px-3 py-2 focus:outline-none"
+              disabled={loading}
+              className="border rounded-lg px-3 py-2 focus:outline-none disabled:bg-gray-100"
             />
           </div>
 
@@ -121,7 +123,8 @@ const SignUp = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="border rounded-lg px-3 py-2 focus:outline-none pr-10"
+              disabled={loading}
+              className="border rounded-lg px-3 py-2 focus:outline-none pr-10 disabled:bg-gray-100"
             />
             {visible ? (
               <IoIosEye
@@ -155,7 +158,7 @@ const SignUp = () => {
                 </span>
                 <label
                   htmlFor="file-input"
-                  className="ml-5 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                  className={`ml-5 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 ${loading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
                 >
                   <span>Upload a file</span>
                   <input
@@ -164,18 +167,23 @@ const SignUp = () => {
                     id="file-input"
                     accept=".jpg,.jpeg,.png"
                     onChange={handleFileInputChange}
+                    disabled={loading}
                     className="sr-only"
                   />
                 </label>
               </div>
             </div>
 
-
           <button
             type="submit"
-            className="mt-4 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+            disabled={loading}
+            className={`mt-4 py-2 rounded-lg transition duration-200 ${
+              loading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            } text-white`}
           >
-            Sign Up
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
 
           <div className="text-center text-sm text-gray-600">
