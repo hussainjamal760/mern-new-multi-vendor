@@ -7,6 +7,7 @@ const { upload } = require("../multer.js");
 const catchAsync = require("../middleware/catchAsyncError.js");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail.js");
+const sendToken = require("../utils/jwtToken.js");
 
 const router = express.Router();
 
@@ -75,7 +76,29 @@ router.post(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
+
   })
 );
+
+
+    router.post("/activation" , catchAsync(async (req,res,next)=>{
+
+   
+    try {
+        const {activation_token} = req.body
+        const newUser = jwt.verify(activation_token , process.env.ACTIVATION_SECRET)
+
+        if(!newUser){return next(new ErrorHandler("Invalid token" , 400))}
+
+        const {name , email , password , avatar} = newUser
+
+        User.create({
+            name , email , password , avatar
+        })
+            sendToken(newUser , 201 , res)
+         } catch (error) {
+        
+    }
+     }))
 
 module.exports = router;
