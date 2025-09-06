@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../styles/styles";
 import { categoriesData, productData } from "../static/data";
@@ -43,15 +43,17 @@ const Header = ({ activeHeading }) => {
 
   return (
     <>
-      {/* Top Header */}
-      <div className={`${styles.section}`}>
-        <div className="hidden 800px:h-[50px] 800px:my-[20px] 800px:flex items-center justify-between">
+      {/* 🔹 Top Header */}
+      <div className="w-full bg-[#f8f8f8] border-b">
+        <div className={`${styles.section} h-[70px] flex items-center justify-between`}>
+          
           {/* Logo */}
           <div>
             <Link to="/">
               <img
                 src="https://shopo.quomodothemes.website/assets/images/logo.svg"
                 alt="logo"
+                className="w-[150px]"
               />
             </Link>
           </div>
@@ -63,93 +65,80 @@ const Header = ({ activeHeading }) => {
               placeholder="Search Product..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="h-[40px] w-full px-2 border-[#3957db] border-[2px] rounded-md"
+              className="h-[40px] w-full px-3 border border-gray-300 rounded-md"
             />
             <AiOutlineSearch
-              size={30}
-              className="absolute right-2 top-1.5 cursor-pointer"
+              size={22}
+              className="absolute right-3 top-2.5 cursor-pointer text-gray-600"
             />
 
-            {searchData && searchData.length !== 0 ? (
-              <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm-2 z-[9] p-4">
+            {searchData && searchData.length !== 0 && (
+              <div className="absolute min-h-[30vh] bg-slate-50 shadow-md rounded-md z-[9] p-4 w-full">
                 {searchData.map((i) => (
                   <Link key={i.id} to={`/product/${i.id}`}>
-                    <div className="w-full flex items-center py-2">
+                    <div className="w-full flex items-center py-2 hover:bg-gray-100 rounded-md px-2">
                       <img
                         src={i.image_Url[0]?.url}
                         alt={i.name}
-                        className="w-[40px] h-[40px] mr-[10px]"
+                        className="w-[40px] h-[40px] mr-[10px] rounded"
                       />
-                      <h1>{i.name}</h1>
+                      <h1 className="text-sm">{i.name}</h1>
                     </div>
                   </Link>
                 ))}
               </div>
-            ) : null}
+            )}
           </div>
 
           {/* Seller Button */}
-          <div className={`${styles.button}`}>
-            <Link to={`${isSeller ? "/dashboard" : "/shop-create"}`}>
-              <h1 className="text-[#fff] flex items-center">
-                {isSeller ? "Go Dashboard" : "Become Seller"}{" "}
-                <IoIosArrowForward className="ml-1" />
-              </h1>
+          <div>
+            <Link
+              to={`${isSeller ? "/dashboard" : "/shop-create"}`}
+              className="bg-black text-white px-4 py-2 rounded-md"
+            >
+              {isSeller ? "Go Dashboard" : "Become Seller"}
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Navigation bar */}
+      {/* 🔹 Navigation bar */}
       <div
         className={`${
           active ? "shadow-sm fixed top-0 left-0 z-10" : ""
-        } transition hidden 800px:flex items-center justify-between w-full bg-[#3321c8] h-[70px]`}
+        } transition w-full bg-[#3321c8] h-[60px]`}
       >
-        <div
-          className={`${styles.section} relative ${styles.noramlFlex} justify-between`}
-        >
+        <div className={`${styles.section} flex items-center justify-between h-full`}>
+          
           {/* Categories Dropdown */}
-          <div onClick={() => setDropDown(!dropDown)}>
-            <div className="relative h-[60px] mt-[10px] w-[270px] hidden 1000px:block">
-              <BiMenuAltLeft size={30} className="absolute top-3 left-2" />
-              <button
-                className={`h-[100%] w-full flex justify-between items-center pl-10 bg-white font-sans text-lg font-[500] select-none rounded-t-md`}
-              >
-                All Categories
-              </button>
-              <IoIosArrowDown
-                size={20}
-                className="absolute right-2 top-4 cursor-pointer"
-                onClick={() => setDropDown(!dropDown)}
+          <div onClick={() => setDropDown(!dropDown)} className="relative h-full">
+            <BiMenuAltLeft size={25} className="absolute top-4 left-2" />
+            <button className="h-full w-[250px] flex justify-between items-center pl-10 bg-white text-[16px] font-[500] select-none rounded-t-md">
+              All Categories
+            </button>
+            <IoIosArrowDown
+              size={18}
+              className="absolute right-2 top-5 cursor-pointer"
+              onClick={() => setDropDown(!dropDown)}
+            />
+            {dropDown && (
+              <DropDown
+                categoriesData={categoriesData}
+                setDropDown={setDropDown}
               />
-              {dropDown ? (
-                <DropDown
-                  categoriesData={categoriesData}
-                  setDropDown={setDropDown}
-                />
-              ) : null}
-            </div>
+            )}
           </div>
 
           {/* NavItems */}
-          <div className={`${styles.noramlFlex}`}>
+          <div className="flex">
             <Navbar active={activeHeading} />
           </div>
 
-          {/* Right Icons (frontend only) */}
-          <div className="flex">
-            <div className="relative cursor-pointer mr-[15px]">
-              <AiOutlineHeart size={30} color="rgb(255 255 255 / 83%)" />
-            </div>
-
-            <div className="relative cursor-pointer mr-[15px]">
-              <AiOutlineShoppingCart size={30} color="rgb(255 255 255 / 83%)" />
-            </div>
-
-            <div className="relative cursor-pointer mr-[15px]">
-              <CgProfile size={30} color="rgb(255 255 255 / 83%)" />
-            </div>
+          {/* 🔹 Right Icons */}
+          <div className="flex items-center space-x-6">
+            <AiOutlineHeart size={26} color="white" className="cursor-pointer" />
+            <AiOutlineShoppingCart size={26} color="white" className="cursor-pointer" />
+            <CgProfile size={26} color="white" className="cursor-pointer" />
           </div>
         </div>
       </div>
