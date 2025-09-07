@@ -9,6 +9,8 @@ import {
 } from "react-icons/ai";
 import { data, Link } from "react-router-dom";
 import styles from "../styles/styles";
+import ProductDetailsCard from "./ProductdetailsCard";
+
 
 
 
@@ -78,7 +80,7 @@ const ProductCard = ({data}) => {
               <h5 className={`${styles.productDiscountPrice}`}>
                 {data.price === 0
                   ? data.price
-                  : data.discountPrice}
+                  : data.discount_price}
                 $
               </h5>
               <h4 className={`${styles.price}`}>
@@ -124,7 +126,12 @@ const ProductCard = ({data}) => {
             color="#444"
             title="Add to cart"
           />
-          
+          {
+            open ? (
+                <ProductDetailsCard open ={open}
+                setOpen={setOpen} data={data}/>
+            ): null
+          }
         </div>
       </div>
     </>
