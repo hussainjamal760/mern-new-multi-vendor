@@ -11,6 +11,7 @@ import { loadUser } from './redux/actions/user'
 import HomePage from './pages/HomePage'
 import ProductsPage from './pages/ProductsPage'
 import BestSellingPage from './pages/BestSellingPage'
+import EventsPage from './pages/EventsPage'
 
 const App = () => {
   useEffect(() => {
@@ -26,6 +27,7 @@ const App = () => {
         <Route path='/sign-up' element={<SignUp/>}/>
         <Route path='/products' element={<ProductsPage/>}/>
         <Route path='/best-selling' element={<BestSellingPage/>}/>
+        <Route path='/events' element={<EventsPage/>}/>
         <Route path='/activation/:activation_token' element={<Activation/>}/>
       </Routes>
 
