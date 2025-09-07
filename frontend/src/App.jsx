@@ -12,6 +12,7 @@ import HomePage from './pages/HomePage'
 import ProductsPage from './pages/ProductsPage'
 import BestSellingPage from './pages/BestSellingPage'
 import EventsPage from './pages/EventsPage'
+import FAQPage from './pages/FAQPage'
 
 const App = () => {
   useEffect(() => {
@@ -28,6 +29,7 @@ const App = () => {
         <Route path='/products' element={<ProductsPage/>}/>
         <Route path='/best-selling' element={<BestSellingPage/>}/>
         <Route path='/events' element={<EventsPage/>}/>
+        <Route path='/faq' element={<FAQPage/>}/>
         <Route path='/activation/:activation_token' element={<Activation/>}/>
       </Routes>
 
