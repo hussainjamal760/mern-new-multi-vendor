@@ -43,6 +43,13 @@ const Header = ({ activeHeading }) => {
     }
   });
 
+  // Debug logging
+  console.log("🔍 Header Debug Info:");
+  console.log("isAuthenticated:", isAuthenticated);
+  console.log("user:", user);
+  console.log("user?.avatar:", user?.avatar);
+  console.log("backend_url:", backend_url);
+
   return (
     <>
       {/* 🔹 Top Header */}
@@ -141,31 +148,35 @@ const Header = ({ activeHeading }) => {
             <AiOutlineHeart size={26} color="white" className="cursor-pointer" />
             <AiOutlineShoppingCart size={26} color="white" className="cursor-pointer" />
             
-              <div className={`${styles.noramlFlex}`}>
-                <div className="relative cursor-pointer mr-[15px]">
-
-                {isAuthenticated ? (
+            <div className={`${styles.noramlFlex}`}>
+              <div className="relative cursor-pointer mr-[15px]">
+                {isAuthenticated && user ? (
                   <div>
                     <Link to="/profile">
                       <img
-                        src={`${backend_url}${user.avatar}`}
-                        alt=""
-                        className="w-[60px] h-[60px] rounded-full border-[3px] border-[#0eae88]"
-                        />
+                        src={user.avatar?.url ? `${backend_url}${user.avatar.url}` : "/default-avatar.png"}
+                        alt="User Avatar"
+                        className="w-[35px] h-[35px] rounded-full border-[2px] border-[#0eae88] object-cover"
+                        onError={(e) => {
+                          console.log("❌ Avatar image failed to load:", e.target.src);
+                          e.target.src = "/default-avatar.png"; // Fallback image
+                        }}
+                        onLoad={() => {
+                          console.log("✅ Avatar image loaded successfully");
+                        }}
+                      />
                     </Link>
                   </div>
                 ) : (
-                  <>
-            <CgProfile size={26} color="white" className="cursor-pointer" />
-                  </>
+                  <Link to="/login">
+                    <CgProfile size={26} color="white" className="cursor-pointer" />
+                  </Link>
                 )}
-                </div>
               </div>
+            </div>
           </div>
         </div>
       </div>
-
-  
     </>
   );
 };
