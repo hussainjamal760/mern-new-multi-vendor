@@ -9,6 +9,7 @@ import './toast-custom.css'   // custom css import ki
 import Store from './redux/store'
 import { loadUser } from './redux/actions/user'
 import HomePage from './pages/HomePage'
+import ProductsPage from './pages/ProductsPage'
 
 const App = () => {
   useEffect(() => {
@@ -22,6 +23,7 @@ const App = () => {
         <Route path='/' element={<HomePage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/sign-up' element={<SignUp/>}/>
+        <Route path='/products' element={<ProductsPage/>}/>
         <Route path='/activation/:activation_token' element={<Activation/>}/>
       </Routes>
 
