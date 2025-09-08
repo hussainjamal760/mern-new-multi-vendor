@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState , useEffect} from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 import { RxAvatar } from "react-icons/rx";
 import axios from "axios";
 import { server } from "../server.js";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const SignUp = () => {
   const [name, setName] = useState(""); 
@@ -13,6 +14,10 @@ const SignUp = () => {
   const [avatar, setAvatar] = useState(null);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+
+    const {isAuthenticated} = useSelector((state) => state.user)
+  
+    const navigate = useNavigate();
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0]; 
@@ -75,6 +80,13 @@ const SignUp = () => {
   } finally {
     setLoading(false);
   }
+
+    useEffect(()=>{
+      if(isAuthenticated === true){
+        navigate('/')
+      }
+    })
+
 };
 
   return (

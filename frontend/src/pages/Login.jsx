@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 import axios from "axios";
 import { server } from "../server";
+import {useSelector} from "react-redux"
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const {isAuthenticated} = useSelector((state) => state.user)
 
   const navigate = useNavigate();
 
@@ -42,6 +44,8 @@ const Login = () => {
         navigate("/");
         window.location.reload(true);
       }, 1000);
+
+    
       
     } catch (err) {
       let errorMessage = "Login failed. Please try again.";
@@ -61,6 +65,12 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  useEffect(()=>{
+    if(isAuthenticated === true){
+      navigate('/')
+    }
+  })
 
   return (
     <>

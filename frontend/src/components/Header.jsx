@@ -14,6 +14,7 @@ import { CgProfile } from "react-icons/cg";
 import DropDown from "./DropDown";
 import Navbar from "./Navbar";
 import { backend_url } from "../server";
+import Cart from "./Cart";
 
 const Header = ({ activeHeading }) => {
   const [isSeller] = useState(false);
@@ -22,6 +23,8 @@ const Header = ({ activeHeading }) => {
   const [searchData, setSearchData] = useState(null);
   const [active, setActive] = useState(false);
   const [dropDown, setDropDown] = useState(false);
+  const [openCart , setOpenCart] = useState(false)
+  const [wishList , setwishList] = useState(false)
 
   const handleSearchChange = (e) => {
     const term = e.target.value;
@@ -43,12 +46,6 @@ const Header = ({ activeHeading }) => {
     }
   });
 
-  // Debug logging
-  console.log("🔍 Header Debug Info:");
-  console.log("isAuthenticated:", isAuthenticated);
-  console.log("user:", user);
-  console.log("user?.avatar:", user?.avatar);
-  console.log("backend_url:", backend_url);
 
   return (
     <>
@@ -146,13 +143,15 @@ const Header = ({ activeHeading }) => {
           {/* 🔹 Right Icons */}
           <div className="flex items-center space-x-6">
             <AiOutlineHeart size={26} color="white" className="cursor-pointer" />
-            <AiOutlineShoppingCart size={26} color="white" className="cursor-pointer" />
+            <AiOutlineShoppingCart size={26} color="white" 
+            onClick={()=>setOpenCart(true)}
+            className="cursor-pointer" />
             
             <div className={`${styles.noramlFlex}`}>
               <div className="relative cursor-pointer mr-[15px]">
                 {isAuthenticated && user ? (
                   <div>
-                    <Link to="/profile">
+                    <Link to="/login">
                       <img
                         src={user.avatar?.url ? `${backend_url}${user.avatar.url}` : "/default-avatar.png"}
                         alt="User Avatar"
@@ -174,6 +173,15 @@ const Header = ({ activeHeading }) => {
                 )}
               </div>
             </div>
+
+                <div>
+                    {
+                      openCart ? (
+                        <Cart setOpenCart={setOpenCart}/>
+                       ) : null
+                    }
+                </div>
+
           </div>
         </div>
       </div>
