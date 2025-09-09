@@ -15,6 +15,7 @@ import DropDown from "./DropDown";
 import Navbar from "./Navbar";
 import { backend_url } from "../server";
 import Cart from "./Cart";
+import Wishlist from "./Wishlist";
 
 const Header = ({ activeHeading }) => {
   const [isSeller] = useState(false);
@@ -24,7 +25,7 @@ const Header = ({ activeHeading }) => {
   const [active, setActive] = useState(false);
   const [dropDown, setDropDown] = useState(false);
   const [openCart , setOpenCart] = useState(false)
-  const [wishList , setwishList] = useState(false)
+  const [openWishlist , setOpenWishlist] = useState(false)
 
   const handleSearchChange = (e) => {
     const term = e.target.value;
@@ -142,8 +143,8 @@ const Header = ({ activeHeading }) => {
 
           {/* 🔹 Right Icons */}
           <div className="flex items-center space-x-6">
-            <AiOutlineHeart size={26} color="white" className="cursor-pointer" />
-            <AiOutlineShoppingCart size={26} color="white" 
+            <AiOutlineHeart onClick={()=>setOpenWishlist(true)} size={26} color="white" className="cursor-pointer" />
+            <AiOutlineShoppingCart  size={26} color="white" 
             onClick={()=>setOpenCart(true)}
             className="cursor-pointer" />
             
@@ -182,6 +183,13 @@ const Header = ({ activeHeading }) => {
                     }
                 </div>
 
+                 <div>
+                    {
+                      openWishlist ? (
+                        <Wishlist setOpenWishlist={setOpenWishlist}/>
+                       ) : null
+                    }
+                </div>
           </div>
         </div>
       </div>
