@@ -47,7 +47,7 @@ const Wishlist = ({ setOpenWishlist }) => {
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto">
           {cartData &&
-            cartData.map((i, index) => <CartSingle key={index} data={i} />)}
+            cartData.map((i, index) => <WishlistSingle key={index} data={i} />)}
         </div>
 
         
@@ -56,7 +56,7 @@ const Wishlist = ({ setOpenWishlist }) => {
   )
 }
 
-const CartSingle = ({ data }) => {
+const WishlistSingle = ({ data }) => {
   const [value, setValue] = useState(1)
   const totalPrice = data.price * value
 

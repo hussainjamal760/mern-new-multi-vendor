@@ -13,6 +13,7 @@ import ProductsPage from './pages/ProductsPage'
 import BestSellingPage from './pages/BestSellingPage'
 import EventsPage from './pages/EventsPage'
 import FAQPage from './pages/FAQPage'
+import ProductDetailsPage from './pages/ProductDetailsPage'
 
 const App = () => {
   useEffect(() => {
@@ -27,6 +28,7 @@ const App = () => {
         <Route path='/login' element={<Login/>}/>
         <Route path='/sign-up' element={<SignUp/>}/>
         <Route path='/products' element={<ProductsPage/>}/>
+        <Route path='/product/:name' element={<ProductDetailsPage/>}/>
         <Route path='/best-selling' element={<BestSellingPage/>}/>
         <Route path='/events' element={<EventsPage/>}/>
         <Route path='/faq' element={<FAQPage/>}/>
