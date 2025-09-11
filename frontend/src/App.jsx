@@ -14,6 +14,7 @@ import BestSellingPage from './pages/BestSellingPage'
 import EventsPage from './pages/EventsPage'
 import FAQPage from './pages/FAQPage'
 import ProductDetailsPage from './pages/ProductDetailsPage'
+import ProfilePage from './pages/ProfilePage'
 
 const App = () => {
   useEffect(() => {
@@ -33,6 +34,7 @@ const App = () => {
         <Route path='/events' element={<EventsPage/>}/>
         <Route path='/faq' element={<FAQPage/>}/>
         <Route path='/activation/:activation_token' element={<Activation/>}/>
+        <Route path='/profile' element={<ProfilePage/>}/>
       </Routes>
 
       <ToastContainer
