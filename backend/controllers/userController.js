@@ -9,15 +9,8 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail.js");
 const sendToken = require("../utils/jwtToken.js");
 
-// Let's first check if the auth import works
-console.log("🔍 Attempting to import auth middleware...");
-try {
-  const { isAuthenticated } = require("../middleware/auth.js");
-  console.log("✅ Auth middleware imported successfully:", typeof isAuthenticated);
-} catch (error) {
-  console.log("❌ Auth middleware import failed:", error.message);
-  console.log("📁 Full error:", error);
-}
+// Import auth middleware at the top
+const { isAuthenticated } = require("../middleware/auth.js");
 
 const router = express.Router();
 
@@ -45,44 +38,26 @@ router.get("/getuser-simple", catchAsync(async (req, res, next) => {
   });
 }));
 
-// Now let's try to define the protected route
-console.log("🔍 Attempting to define protected /getuser route...");
-try {
-  const { isAuthenticated } = require("../middleware/auth.js");
+// Protected getuser route
+router.get("/getuser", isAuthenticated, catchAsync(async (req, res, next) => {
+  console.log("👤 Protected GetUser route hit!");
+  console.log("🔍 User from token:", req.user);
   
-  router.get("/getuser", isAuthenticated, catchAsync(async (req, res, next) => {
-    console.log("👤 Protected GetUser route hit!");
-    console.log("🔍 User from token:", req.user);
-    
-    try {
-      const user = await User.findById(req.user.id);
+  try {
+    const user = await User.findById(req.user.id);
 
-      if (!user) {
-        return next(new ErrorHandler("User doesn't exist", 400));
-      }
-
-      res.status(200).json({
-        success: true,
-        user,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
+    if (!user) {
+      return next(new ErrorHandler("User doesn't exist", 400));
     }
-  }));
-  
-  console.log("✅ Protected /getuser route defined successfully");
-} catch (error) {
-  console.log("❌ Failed to define protected /getuser route:", error.message);
-  
-  // Define a fallback route without authentication
-  router.get("/getuser", (req, res) => {
-    res.status(500).json({
-      success: false,
-      message: "Authentication middleware failed to load",
-      error: error.message
+
+    res.status(200).json({
+      success: true,
+      user,
     });
-  });
-}
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+}));
 
 // Activation token generator
 const createActivationToken = (user) => {
@@ -232,21 +207,22 @@ router.post("/login-user", catchAsync(async (req, res, next) => {
 }));
 
 
-router.get("/logout" , isAuthenticated , catchAsync(async(req,res,next)=>{
+router.get("/logout", isAuthenticated, catchAsync(async (req, res, next) => {
+  
   try {
-    
-    res.cookie("token" , null , {
-      expires:new Date(Date.now()),
-      httpOnly:true,
-    })
+    res.cookie("token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      sameSite: 'lax' 
+    });
 
     res.status(200).json({
-      success:true,
-      message : "Log out Successfull"
-    })
+      success: true,
+      message: "Logged out successfully"
+    });
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }
-}))
+}));
 
 module.exports = router;
