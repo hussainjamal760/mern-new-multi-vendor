@@ -231,13 +231,22 @@ router.post("/login-user", catchAsync(async (req, res, next) => {
   }
 }));
 
-console.log("📝 UserController routes registered:");
-console.log("   GET  /test");
-console.log("   GET  /getuser-simple");
-console.log("   GET  /getuser (protected)");
-console.log("   POST /create-user");
-console.log("   POST /activation");  
-console.log("   POST /login-user");
-console.log("🎯 UserController: Route definitions completed");
+
+router.get("/logout" , isAuthenticated , catchAsync(async(req,res,next)=>{
+  try {
+    
+    res.cookie("token" , null , {
+      expires:new Date(Date.now()),
+      httpOnly:true,
+    })
+
+    res.status(200).json({
+      success:true,
+      message : "Log out Successfull"
+    })
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+}))
 
 module.exports = router;
