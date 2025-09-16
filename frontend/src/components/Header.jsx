@@ -136,10 +136,9 @@ const Header = ({ activeHeading }) => {
             )}
           </div>
 
-          {/* NavItems */}
-          <div className="flex">
-            <Navbar active={activeHeading} />
-          </div>
+        <div className="flex">
+  <Navbar active={activeHeading} />
+</div>
 
           {/* 🔹 Right Icons */}
           <div className="flex items-center space-x-6">
