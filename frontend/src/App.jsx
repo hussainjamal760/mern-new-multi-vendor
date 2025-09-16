@@ -15,8 +15,11 @@ import EventsPage from './pages/EventsPage'
 import FAQPage from './pages/FAQPage'
 import ProductDetailsPage from './pages/ProductDetailsPage'
 import ProfilePage from './pages/ProfilePage'
+import ProtectedRoute from './ProtectedRoute'
+import { useSelector } from 'react-redux'
 
 const App = () => {
+  const {loading , isAuthenticated} = useSelector((state) => state.user)
   useEffect(() => {
    Store.dispatch(loadUser())
   }, [])
@@ -24,18 +27,26 @@ const App = () => {
 
   return (
     <>
-      <Routes>
-        <Route path='/' element={<HomePage/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/sign-up' element={<SignUp/>}/>
-        <Route path='/products' element={<ProductsPage/>}/>
-        <Route path='/product/:name' element={<ProductDetailsPage/>}/>
-        <Route path='/best-selling' element={<BestSellingPage/>}/>
-        <Route path='/events' element={<EventsPage/>}/>
-        <Route path='/faq' element={<FAQPage/>}/>
-        <Route path='/activation/:activation_token' element={<Activation/>}/>
-        <Route path='/profile' element={<ProfilePage/>}/>
-      </Routes>
+     <Routes>
+  <Route path='/' element={<HomePage/>}/>
+  <Route path='/login' element={<Login/>}/>
+  <Route path='/sign-up' element={<SignUp/>}/>
+  <Route path='/products' element={<ProductsPage/>}/>
+  <Route path='/product/:name' element={<ProductDetailsPage/>}/>
+  <Route path='/best-selling' element={<BestSellingPage/>}/>
+  <Route path='/events' element={<EventsPage/>}/>
+  <Route path='/faq' element={<FAQPage/>}/>
+  <Route path='/activation/:activation_token' element={<Activation/>}/>
+
+  <Route
+    path='/profile'
+    element={
+      <ProtectedRoute isAuthenticated={isAuthenticated}>
+        <ProfilePage/>
+      </ProtectedRoute>
+    }
+  />
+</Routes>
 
       <ToastContainer
         position="top-right"
