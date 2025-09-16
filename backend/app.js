@@ -3,6 +3,7 @@ const dotenv = require("dotenv")
 const ErrorHandler = require("./utils/errorHandler.js")
 const cookieParser = require("cookie-parser")
 const userController = require("./controllers/userController.js")
+const shopController = require("./controllers/shopController.js")
 const cors = require("cors")
 const app = express()
 const errorMiddleware = require("./middleware/error.js")
@@ -31,6 +32,7 @@ app.use("/", express.static("uploads"))
 
 // Routes
 app.use("/api/v2/user", userController)
+app.use("/api/v2/shop", shopController)
 
 // Test route
 app.get("/", (req, res) => {

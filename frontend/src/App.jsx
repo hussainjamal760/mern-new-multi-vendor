@@ -17,6 +17,8 @@ import ProductDetailsPage from './pages/ProductDetailsPage'
 import ProfilePage from './pages/ProfilePage'
 import ProtectedRoute from './ProtectedRoute'
 import { useSelector } from 'react-redux'
+import CheckoutPage from './pages/CheckoutPage'
+import ShopCreatePage from './pages/ShopCreatePage'
 
 const App = () => {
   const {loading , isAuthenticated} = useSelector((state) => state.user)
@@ -36,6 +38,7 @@ const App = () => {
   <Route path='/best-selling' element={<BestSellingPage/>}/>
   <Route path='/events' element={<EventsPage/>}/>
   <Route path='/faq' element={<FAQPage/>}/>
+  <Route path='/shop-create' element={<ShopCreatePage/>}/>
   <Route path='/activation/:activation_token' element={<Activation/>}/>
 
   <Route
@@ -43,6 +46,15 @@ const App = () => {
     element={
       <ProtectedRoute isAuthenticated={isAuthenticated}>
         <ProfilePage/>
+      </ProtectedRoute>
+    }
+  />
+  
+  <Route
+    path='/checkout'
+    element={
+      <ProtectedRoute isAuthenticated={isAuthenticated}>
+        <CheckoutPage/>
       </ProtectedRoute>
     }
   />

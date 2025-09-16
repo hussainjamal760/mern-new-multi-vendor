@@ -14,11 +14,9 @@ const { isAuthenticated } = require("../middleware/auth.js");
 
 const router = express.Router();
 
-console.log("🎯 UserController: Starting route definitions...");
 
 // Test route without any middleware
 router.get("/test", (req, res) => {
-  console.log("🧪 Test route hit!");
   res.json({
     success: true,
     message: "User controller is working!",
@@ -27,22 +25,10 @@ router.get("/test", (req, res) => {
   });
 });
 
-// Simple getuser route without authentication first
-router.get("/getuser-simple", catchAsync(async (req, res, next) => {
-  console.log("👤 Simple GetUser route hit!");
-  
-  res.status(200).json({
-    success: true,
-    message: "Simple getuser route working!",
-    note: "This route doesn't require authentication"
-  });
-}));
 
 // Protected getuser route
 router.get("/getuser", isAuthenticated, catchAsync(async (req, res, next) => {
-  console.log("👤 Protected GetUser route hit!");
-  console.log("🔍 User from token:", req.user);
-  
+
   try {
     const user = await User.findById(req.user.id);
 
@@ -67,7 +53,6 @@ const createActivationToken = (user) => {
 };
 
 router.post("/create-user", upload.single("file"), catchAsync(async (req, res, next) => {
-  console.log("📝 Create user route hit!");
   const { name, email, password } = req.body;
 
   const userEmail = await User.findOne({ email });
@@ -130,7 +115,6 @@ router.post("/create-user", upload.single("file"), catchAsync(async (req, res, n
 }));
 
 router.post("/activation", catchAsync(async (req, res, next) => {
-  console.log("🎯 Activation route hit!");
   
   try {
     const { activation_token } = req.body;
@@ -174,7 +158,6 @@ router.post("/activation", catchAsync(async (req, res, next) => {
 }));
 
 router.post("/login-user", catchAsync(async (req, res, next) => {
-  console.log("🔐 Login route hit!");
   
   try {
     const { email, password } = req.body;
