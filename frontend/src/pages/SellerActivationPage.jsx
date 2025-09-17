@@ -34,7 +34,7 @@ const SellerActivationPage = () => {
           toast.success("Account activated successfully! 🎉");
           
           setTimeout(() => {
-            navigate('/login');
+            navigate('/login-shop');
           }, 3000);
           
         } catch (err) {
@@ -138,7 +138,7 @@ const SellerActivationPage = () => {
           
           {error && (
             <button 
-              onClick={() => navigate('/sign-up')}
+              onClick={() => navigate('/create-shop')}
               style={{
                 padding: "12px 24px",
                 backgroundColor: "#007bff",
