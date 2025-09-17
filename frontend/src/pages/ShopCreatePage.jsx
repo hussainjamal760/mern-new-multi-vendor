@@ -21,88 +21,83 @@ const ShopCreatePage = () => {
   const { isAuthenticated } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
+  // ✅ Move useEffect to top level
+  useEffect(() => {
+    if (isAuthenticated === true) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
     setAvatar(file);
   };
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
-   
-   try {
-     setLoading(true);
-     
-     // Basic validation
-     if (!name || !email || !password) {
-       toast.error("Please fill in all required fields");
-       return;
-     }
-     
-     if (!avatar) {
-       toast.error("Please add an avatar image");
-       return;
-     }
- 
-     const config = {
-       headers: {
-         "Content-Type": "multipart/form-data"
-       }
-     };
- 
-     const newForm = new FormData();
-     
-     newForm.append("file", avatar);
-     newForm.append("name", name);
-     newForm.append("email", email);
-     newForm.append("password", password);
-     newForm.append("zipcode",zipCode);
-     newForm.append("address",address);
-     newForm.append("phoneNumber",phoneNumber);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      setLoading(true);
+      
+      // Basic validation
+      if (!name || !email || !password) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+      
+      if (!avatar) {
+        toast.error("Please add an avatar image");
+        return;
+      }
 
- 
-     toast.info("Creating your account...");
-     
-     const response = await axios.post(`${server}/shop/shop-create`, newForm, config);
-     
-     toast.success(response.data.message || "Account created successfully! Please check your email.");
-     
-     // Reset form
-     setName("");
-     setEmail("");
-     setPassword("");
-     setAvatar(null);
-     setZipCode();
-     setAddress();
-     setPhoneNumber();
-     
-   } catch (error) {
-     if (error.response) {
-       // Server responded with error status
-       toast.error(error.response.data.message || "Server error occurred");
-     } else if (error.request) {
-       // Request made but no response
-       toast.error("Network error. Please check your connection.");
-     } else {
-       // Something else happened
-       toast.error("An unexpected error occurred.");
-     }
-   } finally {
-     setLoading(false);
-   }
- 
-     useEffect(()=>{
-       if(isAuthenticated === true){
-         navigate('/')
-       }
-     })
- 
- };
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      };
 
-  useEffect(() => {
-    if (isAuthenticated === true) {
-      navigate("/");
+      const newForm = new FormData();
+      
+      // ✅ Fix field names to match backend expectations
+      newForm.append("file", avatar);
+      newForm.append("name", name);
+      newForm.append("email", email);
+      newForm.append("password", password);
+      newForm.append("zipCode", zipCode); // Fixed: was "zipcode"
+      newForm.append("address", address);
+      newForm.append("phoneNumber", phoneNumber);
+
+      toast.info("Creating your account...");
+      
+      const response = await axios.post(`${server}/shop/shop-create`, newForm, config);
+      
+      toast.success(response.data.message || "Account created successfully! Please check your email.");
+      
+      // Reset form
+      setName("");
+      setEmail("");
+      setPassword("");
+      setAvatar(null);
+      setZipCode("");
+      setAddress("");
+      setPhoneNumber("");
+      
+    } catch (error) {
+      console.error("Shop creation error:", error);
+      if (error.response) {
+        // Server responded with error status
+        toast.error(error.response.data.message || "Server error occurred");
+      } else if (error.request) {
+        // Request made but no response
+        toast.error("Network error. Please check your connection.");
+      } else {
+        // Something else happened
+        toast.error("An unexpected error occurred.");
+      }
+    } finally {
+      setLoading(false);
     }
-  });
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 px-4">
@@ -151,7 +146,7 @@ const ShopCreatePage = () => {
             />
           </div>
 
-<div>
+          <div>
             <label htmlFor="number" className="block mb-1 font-medium text-gray-700">
               Phone Number
             </label>

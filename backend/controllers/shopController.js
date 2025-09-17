@@ -1,5 +1,5 @@
 const express = require("express");
-const Shop = require("../model/shopModel.js"); // ✅ Import Shop model
+const Shop = require("../model/shopModel.js");
 const ErrorHandler = require("../utils/errorHandler.js");
 const path = require("path");
 const fs = require("fs");
@@ -7,7 +7,7 @@ const { upload } = require("../multer.js");
 const catchAsyncErrors = require("../middleware/catchAsyncError.js");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail.js");
-const sendToken = require("../utils/jwtToken.js"); // ✅ Use this, not sendShopToken
+const sendToken = require("../utils/jwtToken.js");
 const router = express.Router();
 
 // ✅ Create activation token function
@@ -20,7 +20,16 @@ const createActivationToken = (seller) => {
 // ------------------- Shop Create Route -------------------
 router.post("/shop-create", upload.single("file"), async (req, res, next) => {
   try {
+    console.log("📋 Request body:", req.body);
+    console.log("📎 Request file:", req.file);
+
     const { email } = req.body;
+    
+    // Check if file was uploaded
+    if (!req.file) {
+      return next(new ErrorHandler("Please upload an avatar image", 400));
+    }
+
     const sellerEmail = await Shop.findOne({ email });
 
     // If email already exists → delete uploaded file & throw error
@@ -30,21 +39,23 @@ router.post("/shop-create", upload.single("file"), async (req, res, next) => {
       fs.unlink(filePath, (err) => {
         if (err) console.log(err);
       });
-      return next(new ErrorHandler("User already exists", 400));
+      return next(new ErrorHandler("Shop already exists with this email", 400));
     }
 
     const filename = req.file.filename;
-    const fileUrl = filename; // ✅ No need path.join
+    const fileUrl = filename;
 
     const seller = {
       name: req.body.name,
       email,
       password: req.body.password,
-      avatar: fileUrl,
+      avatar: fileUrl, // ✅ Match the schema structure
       address: req.body.address,
       phoneNumber: req.body.phoneNumber,
-      zipCode: req.body.zipCode,
+      zipCode: req.body.zipCode, // ✅ Fixed field name
     };
+
+    console.log("🏪 Seller object:", seller);
 
     // ✅ Generate activation token & url
     const activationToken = createActivationToken(seller);
@@ -62,9 +73,22 @@ router.post("/shop-create", upload.single("file"), async (req, res, next) => {
         message: `Please check your email (${seller.email}) to activate your shop!`,
       });
     } catch (error) {
+      // Delete uploaded file if email fails
+      const filePath = `uploads/${req.file.filename}`;
+      fs.unlink(filePath, (err) => {
+        if (err) console.log("Error deleting file:", err);
+      });
       return next(new ErrorHandler(error.message, 500));
     }
   } catch (error) {
+    console.error("Shop creation error:", error);
+    // Delete uploaded file if any error occurs
+    if (req.file) {
+      const filePath = `uploads/${req.file.filename}`;
+      fs.unlink(filePath, (err) => {
+        if (err) console.log("Error deleting file:", err);
+      });
+    }
     return next(new ErrorHandler(error.message, 400));
   }
 });
@@ -92,7 +116,7 @@ router.post(
       let seller = await Shop.findOne({ email });
 
       if (seller) {
-        return next(new ErrorHandler("User already exists", 400));
+        return next(new ErrorHandler("Shop already exists", 400));
       }
 
       // ✅ Create shop

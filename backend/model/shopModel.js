@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-
+const bcrypt = require("bcrypt"); // ✅ Add missing import
+const jwt = require("jsonwebtoken"); // ✅ Add missing import
 
 const shopSchema = new mongoose.Schema({
   name:{
@@ -8,7 +9,7 @@ const shopSchema = new mongoose.Schema({
   },
   email:{
     type: String,
-    required: [true, "Please enter your Sjop email!"],
+    required: [true, "Please enter your Shop email!"], // Fixed typo
   },
   password:{
     type: String,
@@ -18,37 +19,34 @@ const shopSchema = new mongoose.Schema({
   },
   phoneNumber:{
     type: Number,
-    required:true
+    required: true
   },
   address:{
     type: String,
-    required:true
+    required: true
   },
-   description:{
+  zipCode:{ // ✅ Add missing zipCode field
+    type: String,
+    required: true
+  },
+  description:{
     type: String,
   },
   role:{
     type: String,
     default: "Seller",
   },
-  avatar:{
-    public_id: {
-      type: String,
-      required: true,
-    },
-    url: {
-      type: String,
-      required: true,
-    },
- },
- createdAt:{
-  type: Date,
-  default: Date.now(),
- },
- resetPasswordToken:String,
- resetPasswordTime:Date,
+  avatar:{ // ✅ Fix avatar structure to match controller
+    type: String,
+    required: true,
+  },
+  createdAt:{
+    type: Date,
+    default: Date.now(),
+  },
+  resetPasswordToken: String,
+  resetPasswordTime: Date,
 });
-
 
 //  Hash password
 shopSchema.pre("save", async function (next){
