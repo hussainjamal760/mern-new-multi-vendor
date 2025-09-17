@@ -70,7 +70,7 @@ const ShopLoginPage = () => {
     if(isAuthenticated === true){
       navigate('/')
     }
-}, [isAuthenticated, navigate]);
+  })
 
   return (
     <>

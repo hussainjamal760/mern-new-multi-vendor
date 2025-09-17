@@ -136,8 +136,9 @@ router.post(
   })
 );
 
-router.post("/login-shop", catchAsync(async (req, res, next) => {
-  
+// Replace the login-shop route in your shopController.js with this:
+
+router.post("/login-shop", catchAsyncErrors(async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -145,23 +146,22 @@ router.post("/login-shop", catchAsync(async (req, res, next) => {
       return next(new ErrorHandler("Please provide all fields!", 400));
     }
 
-    const user = await Seller.findOne({ email }).select("+password");
+    // Use Shop model instead of Seller
+    const shop = await Shop.findOne({ email }).select("+password");
 
-    if (!user) {
-      return next(new ErrorHandler("User doesn't exist!", 400));
+    if (!shop) {
+      return next(new ErrorHandler("Shop doesn't exist!", 400));
     }
 
-    if (!user.isVerified) {
-      return next(new ErrorHandler("Please verify your email before logging in!", 400));
-    }
-
-    const isPasswordValid = await user.comparePassword(password);
+    // Check if password is valid
+    const isPasswordValid = await shop.comparePassword(password);
 
     if (!isPasswordValid) {
       return next(new ErrorHandler("Please provide the correct information", 400));
     }
 
-    sendToken(user, 200, res);
+    // Send token for successful login
+    sendToken(shop, 200, res);
     
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
