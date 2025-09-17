@@ -20,8 +20,7 @@ const createActivationToken = (seller) => {
 // ------------------- Shop Create Route -------------------
 router.post("/shop-create", upload.single("file"), async (req, res, next) => {
   try {
-    console.log("📋 Request body:", req.body);
-    console.log("📎 Request file:", req.file);
+  
 
     const { email } = req.body;
     
@@ -55,7 +54,6 @@ router.post("/shop-create", upload.single("file"), async (req, res, next) => {
       zipCode: req.body.zipCode, // ✅ Fixed field name
     };
 
-    console.log("🏪 Seller object:", seller);
 
     // ✅ Generate activation token & url
     const activationToken = createActivationToken(seller);
@@ -95,7 +93,7 @@ router.post("/shop-create", upload.single("file"), async (req, res, next) => {
 
 // ------------------- Shop Activation Route -------------------
 router.post(
-  "/shop/activation",
+  "/activation",
   catchAsyncErrors(async (req, res, next) => {
     try {
       const { activation_token } = req.body;

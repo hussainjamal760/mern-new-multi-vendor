@@ -40,6 +40,7 @@ const App = () => {
   <Route path='/faq' element={<FAQPage/>}/>
   <Route path='/shop-create' element={<ShopCreatePage/>}/>
   <Route path='/activation/:activation_token' element={<Activation/>}/>
+  <Route path='/seller/activation/:activation_token' element={<Activation/>}/>
 
   <Route
     path='/profile'
