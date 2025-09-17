@@ -26,39 +26,77 @@ const ShopCreatePage = () => {
     setAvatar(file);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+   
+   try {
+     setLoading(true);
+     
+     // Basic validation
+     if (!name || !email || !password) {
+       toast.error("Please fill in all required fields");
+       return;
+     }
+     
+     if (!avatar) {
+       toast.error("Please add an avatar image");
+       return;
+     }
+ 
+     const config = {
+       headers: {
+         "Content-Type": "multipart/form-data"
+       }
+     };
+ 
+     const newForm = new FormData();
+     
+     newForm.append("file", avatar);
+     newForm.append("name", name);
+     newForm.append("email", email);
+     newForm.append("password", password);
+     newForm.append("zipcode",zipCode);
+     newForm.append("address",address);
+     newForm.append("phoneNumber",phoneNumber);
 
-    if (!email || !password || !name || !address || !zipCode) {
-      toast.error("Please fill in all fields!");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      toast.info("Creating your shop...");
-
-      await axios.post(
-        `${server}/user/login-user`,
-        { email, password },
-        { withCredentials: true }
-      );
-
-      toast.success("Shop created successfully 🎉");
-      setTimeout(() => {
-        navigate("/");
-        window.location.reload(true);
-      }, 1000);
-    } catch (err) {
-      let errorMessage = "Something went wrong.";
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      }
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+ 
+     toast.info("Creating your account...");
+     
+     const response = await axios.post(`${server}/shop/shop-create`, newForm, config);
+     
+     toast.success(response.data.message || "Account created successfully! Please check your email.");
+     
+     // Reset form
+     setName("");
+     setEmail("");
+     setPassword("");
+     setAvatar(null);
+     setZipCode();
+     setAddress();
+     setPhoneNumber();
+     
+   } catch (error) {
+     if (error.response) {
+       // Server responded with error status
+       toast.error(error.response.data.message || "Server error occurred");
+     } else if (error.request) {
+       // Request made but no response
+       toast.error("Network error. Please check your connection.");
+     } else {
+       // Something else happened
+       toast.error("An unexpected error occurred.");
+     }
+   } finally {
+     setLoading(false);
+   }
+ 
+     useEffect(()=>{
+       if(isAuthenticated === true){
+         navigate('/')
+       }
+     })
+ 
+ };
 
   useEffect(() => {
     if (isAuthenticated === true) {
@@ -121,7 +159,7 @@ const ShopCreatePage = () => {
               type="text"
               id="number"
               value={phoneNumber}
-              onChange={(e) => setumber(e.target.value)}
+              onChange={(e) => setPhoneNumber(e.target.value)}
               disabled={loading}
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100"
               placeholder="Enter shop Phone number"
