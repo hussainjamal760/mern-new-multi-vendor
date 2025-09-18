@@ -1,18 +1,19 @@
+
+// frontend/src/pages/Login.jsx - Fixed with Redux
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
-import axios from "axios";
-import { server } from "../server";
-import {useSelector} from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { loginUser } from "../redux/actions/user";
 import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const {isAuthenticated} = useSelector((state) => state.user)
-
+  
+  const { isAuthenticated, loading, error } = useSelector((state) => state.user)
+  const dispatch = useDispatch()
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,53 +25,18 @@ const Login = () => {
       return;
     }
 
-    try {
-      setLoading(true);
-      toast.info("Logging you in...");
-      
-      const response = await axios.post(
-        `${server}/user/login-user`,
-        {
-          email,
-          password,
-        },
-        { withCredentials: true }
-      );
-      
-      toast.success("Login successful! Welcome back! 🎉");
-      
-      // Small delay to show success message
-      setTimeout(() => {
-        navigate("/");
-        window.location.reload(true);
-      }, 1000);
-
-    
-      
-    } catch (err) {
-      let errorMessage = "Login failed. Please try again.";
-      
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.response?.status === 404) {
-        errorMessage = "Login service not available. Please try again later.";
-      } else if (err.response?.status === 500) {
-        errorMessage = "Server error. Please try again later.";
-      } else if (err.request) {
-        errorMessage = "Network error. Please check your connection.";
-      }
-      
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    dispatch(loginUser(email, password));
   };
 
-  useEffect(()=>{
-    if(isAuthenticated === true){
-      navigate('/')
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
     }
-  })
+    if (isAuthenticated) {
+      toast.success("Login successful! Welcome back! 🎉");
+      navigate("/");
+    }
+  }, [error, isAuthenticated, navigate])
 
   return (
     <>

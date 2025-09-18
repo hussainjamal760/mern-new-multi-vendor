@@ -1,3 +1,4 @@
+// backend/controllers/shopController.js
 const express = require("express");
 const Shop = require("../model/shopModel.js");
 const ErrorHandler = require("../utils/errorHandler.js");
@@ -9,6 +10,8 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail.js");
 const sendToken = require("../utils/jwtToken.js");
 const SendShopToken = require("../utils/SendShopToken.js");
+const { isSeller } = require("../middleware/auth.js"); // Add missing import
+
 const router = express.Router();
 
 // ✅ Create activation token function
@@ -21,8 +24,6 @@ const createActivationToken = (seller) => {
 // ------------------- Shop Create Route -------------------
 router.post("/shop-create", upload.single("file"), async (req, res, next) => {
   try {
-  
-
     const { email } = req.body;
     
     // Check if file was uploaded
@@ -49,12 +50,11 @@ router.post("/shop-create", upload.single("file"), async (req, res, next) => {
       name: req.body.name,
       email,
       password: req.body.password,
-      avatar: fileUrl, // ✅ Match the schema structure
+      avatar: fileUrl,
       address: req.body.address,
       phoneNumber: req.body.phoneNumber,
-      zipCode: req.body.zipCode, // ✅ Fixed field name
+      zipCode: req.body.zipCode,
     };
-
 
     // ✅ Generate activation token & url
     const activationToken = createActivationToken(seller);
@@ -129,16 +129,15 @@ router.post(
         phoneNumber,
       });
 
-      // ✅ Send token after activation
-    SendShopToken(shop, 200, res);
+      // ✅ Send token after activation - Fixed variable name
+      SendShopToken(seller, 200, res);
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
   })
 );
 
-// Replace the login-shop route in your shopController.js with this:
-
+// ------------------- Shop Login Route -------------------
 router.post("/login-shop", catchAsyncErrors(async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -147,7 +146,7 @@ router.post("/login-shop", catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Please provide all fields!", 400));
     }
 
-    // Use Shop model instead of Seller
+    // Use Shop model
     const shop = await Shop.findOne({ email }).select("+password");
 
     if (!shop) {
@@ -169,8 +168,8 @@ router.post("/login-shop", catchAsyncErrors(async (req, res, next) => {
   }
 }));
 
-router.get("/getSeller", isSeller, catchAsync(async (req, res, next) => {
-
+// ------------------- Get Seller Route -------------------
+router.get("/getSeller", isSeller, catchAsyncErrors(async (req, res, next) => {
   try {
     const seller = await Shop.findById(req.seller._id);
 
@@ -181,6 +180,24 @@ router.get("/getSeller", isSeller, catchAsync(async (req, res, next) => {
     res.status(200).json({
       success: true,
       seller,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+}));
+
+// ------------------- Shop Logout Route -------------------
+router.get("/logout", isSeller, catchAsyncErrors(async (req, res, next) => {
+  try {
+    res.cookie("seller_token", null, { // Fixed: Use seller_token
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      sameSite: 'lax'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
