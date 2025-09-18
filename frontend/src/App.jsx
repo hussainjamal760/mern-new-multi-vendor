@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import Login from './pages/Login'
 import SignUp from './pages/Signup'
 import Activation from './pages/Activation'
@@ -7,7 +7,7 @@ import { ToastContainer, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
 import './toast-custom.css'   // custom css import ki
 import Store from './redux/store'
-import { loadUser } from './redux/actions/user'
+import { loadSeller, loadUser } from './redux/actions/user'
 import HomePage from './pages/HomePage'
 import ProductsPage from './pages/ProductsPage'
 import BestSellingPage from './pages/BestSellingPage'
@@ -21,12 +21,22 @@ import CheckoutPage from './pages/CheckoutPage'
 import ShopCreatePage from './pages/ShopCreatePage'
 import SellerActivationPage from './pages/SellerActivationPage'
 import ShopLoginPage from './pages/ShopLoginPage'
+import SellerProtected from './SellerProtected'
+import SellerHomePage from './pages/SellerHomePage'
 
 const App = () => {
   const {loading , isAuthenticated} = useSelector((state) => state.user)
+  const {isloading , isSeller } = useSelector((state) => state.seller)
   useEffect(() => {
    Store.dispatch(loadUser())
+   Store.dispatch(loadSeller())
+
+
+   if(isSeller === true) {
+    return <Navigate to={"/shop"} replace />
+   }
   }, [])
+  
   
 
   return (
@@ -62,6 +72,16 @@ const App = () => {
       </ProtectedRoute>
     }
   />
+
+  <Route
+    path='/shop/:id'
+    element={
+      <SellerProtected isSeller={isSeller}>
+        <SellerHomePage/>
+      </SellerProtected>
+    }
+  />
+
 </Routes>
 
       <ToastContainer

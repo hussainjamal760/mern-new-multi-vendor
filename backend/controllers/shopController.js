@@ -8,6 +8,7 @@ const catchAsyncErrors = require("../middleware/catchAsyncError.js");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail.js");
 const sendToken = require("../utils/jwtToken.js");
+const SendShopToken = require("../utils/SendShopToken.js");
 const router = express.Router();
 
 // ✅ Create activation token function
@@ -129,7 +130,7 @@ router.post(
       });
 
       // ✅ Send token after activation
-      sendToken(seller, 201, res);
+    SendShopToken(shop, 200, res);
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
@@ -161,12 +162,29 @@ router.post("/login-shop", catchAsyncErrors(async (req, res, next) => {
     }
 
     // Send token for successful login
-    sendToken(shop, 200, res);
+    SendShopToken(shop, 200, res);
     
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));
   }
 }));
 
+router.get("/getSeller", isSeller, catchAsync(async (req, res, next) => {
+
+  try {
+    const seller = await Shop.findById(req.seller._id);
+
+    if (!seller) {
+      return next(new ErrorHandler("Shop doesn't exist", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      seller,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+}));
 
 module.exports = router;

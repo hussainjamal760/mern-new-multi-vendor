@@ -19,14 +19,15 @@ const ShopCreatePage = () => {
   const [loading, setLoading] = useState(false);
 
   const { isAuthenticated } = useSelector((state) => state.user);
+  const { isSeller ,seller} = useSelector((state) => state.seller);
   const navigate = useNavigate();
 
   // ✅ Move useEffect to top level
   useEffect(() => {
-    if (isAuthenticated === true) {
-      navigate("/");
+    if (isSeller === true) {
+      navigate(`/shop/${sseller._id}`);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isSeller, navigate]);
 
   const handleFileInputChange = (e) => {
     const file = e.target.files[0];
@@ -277,7 +278,7 @@ const ShopCreatePage = () => {
           <div className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link
-              to="/sign-up"
+              to="/login-shop"
               className={`text-blue-600 font-medium hover:underline ${
                 loading ? "pointer-events-none opacity-50" : ""
               }`}

@@ -22,7 +22,8 @@ const SellerActivationPage = () => {
             activation_token,
           };
           
-          const res = await axios.post(`${server}/shop/shop/activation`, requestData, {
+          // ✅ FIXED: Corrected the URL path
+          const res = await axios.post(`${server}/shop/activation`, requestData, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -138,7 +139,7 @@ const SellerActivationPage = () => {
           
           {error && (
             <button 
-              onClick={() => navigate('/create-shop')}
+              onClick={() => navigate('/shop-create')}
               style={{
                 padding: "12px 24px",
                 backgroundColor: "#007bff",

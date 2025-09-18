@@ -11,7 +11,7 @@ const ShopLoginPage = () => {
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {isAuthenticated} = useSelector((state) => state.user)
+  const {isSeller ,seller} = useSelector((state) => state.seller)
 
   const navigate = useNavigate();
 
@@ -41,7 +41,7 @@ const ShopLoginPage = () => {
       
       // Small delay to show success message
       setTimeout(() => {
-        navigate("/");
+        navigate(`/shop/${seller._id}`);
         window.location.reload(true);
       }, 1000);
 
@@ -67,8 +67,8 @@ const ShopLoginPage = () => {
   };
 
   useEffect(()=>{
-    if(isAuthenticated === true){
-      navigate('/')
+    if(isSeller === true){
+      navigate(`/shop/${seller._id}`)
     }
   })
 
