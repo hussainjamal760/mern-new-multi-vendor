@@ -44,6 +44,7 @@ const Header = ({ activeHeading }) => {
     setSearchData(filteredProducts);
   };
 
+  
   const clearSearch = () => {
     setSearchTerm("");
     setSearchData(null);

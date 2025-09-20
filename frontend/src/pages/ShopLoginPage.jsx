@@ -32,10 +32,9 @@ const ShopLoginPage = () => {
       
       // Get seller ID and navigate
       const sellerId = data.user._id;
-      console.log("🧭 Navigating to:", `/shop/${sellerId}`);
+      console.log("🧭 Navigating to:", `/dashboard`);
       
       // Use window.location for guaranteed redirect
-      window.location.href = `/shop/${sellerId}`;
       
     } catch (err) {
       console.error("❌ Login error:", err);

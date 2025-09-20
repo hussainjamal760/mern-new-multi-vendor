@@ -1,50 +1,43 @@
-// Debug version of the getuser route - add this to your userController.js
+const ErrorHandler = require("../utils/errorHandler");
+const catchAsync = require("./catchAsyncError");
+const jwt = require("jsonwebtoken");
+const User = require("../model/userModel.js");
+const Shop = require("../model/shopModel.js");
 
-router.get("/getuser", isAuthenticated, catchAsync(async (req, res, next) => {
-  try {
-    // Add detailed logging
-    console.log("📝 GET /getuser called");
-    console.log("🔍 req.user:", req.user);
-    console.log("🆔 req.user type:", typeof req.user);
-    
-    if (!req.user) {
-      console.log("❌ No req.user found");
-      return next(new ErrorHandler("No user found in request", 401));
+exports.isAuthenticated = catchAsync(async(req,res,next) => {
+    const {token} = req.cookies;
+
+    if(!token){
+        return next(new ErrorHandler("Please login to continue", 401));
     }
 
-    console.log("🔑 req.user._id:", req.user._id);
-    console.log("🔑 req.user.id:", req.user.id);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    // Try different approaches to get user ID
-    let userId;
-    if (req.user._id) {
-      userId = req.user._id;
-      console.log("✅ Using req.user._id");
-    } else if (req.user.id) {
-      userId = req.user.id;
-      console.log("✅ Using req.user.id");
-    } else {
-      console.log("❌ No user ID found");
-      return next(new ErrorHandler("No user ID found", 400));
+    req.user = await User.findById(decoded.id);
+
+    next();
+});
+
+
+exports.isSeller = catchAsync(async(req,res,next) => {
+    const {seller_token} = req.cookies;
+    if(!seller_token){
+        return next(new ErrorHandler("Please login to continue", 401));
     }
 
-    console.log("🔍 Looking for user with ID:", userId);
-    const user = await User.findById(userId);
+    const decoded = jwt.verify(seller_token, process.env.JWT_SECRET_KEY);
 
-    if (!user) {
-      console.log("❌ User not found in database");
-      return next(new ErrorHandler("User doesn't exist", 400));
+    req.seller = await Shop.findById(decoded.id);
+
+    next();
+});
+
+
+exports.isAdmin = (...roles) => {
+    return (req,res,next) => {
+        if(!roles.includes(req.user.role)){
+            return next(new ErrorHandler(`${req.user.role} can not access this resources!`))
+        };
+        next();
     }
-
-    console.log("✅ User found:", user.name, user.email);
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    console.error("❌ Get user error:", error);
-    console.error("❌ Error stack:", error.stack);
-    return next(new ErrorHandler(error.message, 500));
-  }
-}));
+}

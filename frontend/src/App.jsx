@@ -1,4 +1,4 @@
-// frontend/src/App.jsx
+// frontend/src/App.jsx - FIXED VERSION
 import React, { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Login from './pages/Login'
@@ -24,16 +24,19 @@ import SellerActivationPage from './pages/SellerActivationPage'
 import ShopLoginPage from './pages/ShopLoginPage'
 import SellerProtected from '../routes/SellerProtected'
 import SellerHomePage from './pages/SellerHomePage'
+import ShopDashboardPage from './pages/ShopDashboardPage'
 
 const App = () => {
-  const { loading } = useSelector((state) => state.user)
-  const { isLoading} = useSelector((state) => state.seller)
+  const { loading, isAuthenticated, user } = useSelector((state) => state.user)
+  const { isLoading, isSeller, seller } = useSelector((state) => state.seller)
   
   useEffect(() => {
+    console.log('🚀 App loading - dispatching loadUser and loadSeller');
     Store.dispatch(loadUser())
     Store.dispatch(loadSeller())
   }, [])
 
+  // Show loading spinner while authentication is being checked
   if (loading || isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -42,11 +45,20 @@ const App = () => {
     )
   }
 
+  console.log('🔍 App render - Auth states:', { 
+    isAuthenticated, 
+    isSeller, 
+    user: user?.name, 
+    seller: seller?.name 
+  });
+
   return (
     <>
       <Routes>
+        {/* Home Route */}
         <Route path='/' element={<HomePage />} />
         
+        {/* Auth Routes - Redirect if already logged in */}
         <Route 
           path='/login' 
           element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} 
@@ -56,12 +68,12 @@ const App = () => {
           element={isAuthenticated ? <Navigate to="/" replace /> : <SignUp />} 
         />
         <Route 
-          path='/login-shop' 
-          element={isSeller ? <Navigate to={`/shop/${seller?._id}`} replace /> : <ShopLoginPage />} 
+          path='/shop-login' 
+          element={isSeller ? <Navigate to={`/shop/${seller._id}`} replace /> : <ShopLoginPage />} 
         />
         <Route 
           path='/shop-create' 
-          element={isSeller ? <Navigate to={`/shop/${seller?._id}`} replace /> : <ShopCreatePage />} 
+          element={isSeller ? <Navigate to={`/shop/${seller._id}`} replace /> : <ShopCreatePage />} 
         />
         
         {/* Public routes */}
@@ -77,7 +89,7 @@ const App = () => {
         <Route
           path='/profile'
           element={
-            <ProtectedRoute >
+            <ProtectedRoute>
               <ProfilePage />
             </ProtectedRoute>
           }
@@ -86,7 +98,7 @@ const App = () => {
         <Route
           path='/checkout'
           element={
-            <ProtectedRoute >
+            <ProtectedRoute>
               <CheckoutPage />
             </ProtectedRoute>
           }
@@ -96,11 +108,22 @@ const App = () => {
         <Route
           path='/shop/:id'
           element={
-            <SellerProtected isSeller={isSeller} isLoading={isLoading}>
+            <SellerProtected>
               <SellerHomePage />
             </SellerProtected>
           }
         />
+
+               <Route
+          path='/dashboard'
+          element={
+            <SellerProtected>
+              <ShopDashboardPage />
+            </SellerProtected>
+          }
+        />
+
+        {/* Fallback route */}
       </Routes>
 
       <ToastContainer
