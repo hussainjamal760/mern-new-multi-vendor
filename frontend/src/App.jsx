@@ -23,7 +23,7 @@ import ShopCreatePage from './pages/ShopCreatePage'
 import SellerActivationPage from './pages/SellerActivationPage'
 import ShopLoginPage from './pages/ShopLoginPage'
 import SellerProtected from '../routes/SellerProtected'
-import SellerHomePage from './pages/SellerHomePage'
+import ShopHomePage from './pages/ShopHomePage'
 import ShopDashboardPage from './pages/ShopDashboardPage'
 
 const App = () => {
@@ -109,7 +109,7 @@ const App = () => {
           path='/shop/:id'
           element={
             <SellerProtected>
-              <SellerHomePage />
+              <ShopHomePage />
             </SellerProtected>
           }
         />
