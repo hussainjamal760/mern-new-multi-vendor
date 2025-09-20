@@ -1,9 +1,13 @@
 
 // frontend/src/SellerProtected.jsx
 import { Navigate } from "react-router-dom"
+import { useSelector } from 'react-redux'
 
-const SellerProtected = ({ isSeller, isLoading, children }) => {
+
+const SellerProtected = ({children }) => {
   // Show loading while checking seller authentication
+    const { isLoading, isSeller } = useSelector((state) => state.seller)
+  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -13,7 +17,7 @@ const SellerProtected = ({ isSeller, isLoading, children }) => {
   }
 
   if (!isSeller) {
-    return <Navigate to="/" replace />
+    return <Navigate to="/shop-login" replace />
   }
   
   return children

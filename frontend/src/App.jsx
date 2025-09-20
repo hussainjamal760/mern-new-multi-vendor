@@ -16,25 +16,24 @@ import EventsPage from './pages/EventsPage'
 import FAQPage from './pages/FAQPage'
 import ProductDetailsPage from './pages/ProductDetailsPage'
 import ProfilePage from './pages/ProfilePage'
-import ProtectedRoute from './ProtectedRoute'
+import ProtectedRoute from '../routes/ProtectedRoute'
 import { useSelector } from 'react-redux'
 import CheckoutPage from './pages/CheckoutPage'
 import ShopCreatePage from './pages/ShopCreatePage'
 import SellerActivationPage from './pages/SellerActivationPage'
 import ShopLoginPage from './pages/ShopLoginPage'
-import SellerProtected from './SellerProtected'
+import SellerProtected from '../routes/SellerProtected'
 import SellerHomePage from './pages/SellerHomePage'
 
 const App = () => {
-  const { loading, isAuthenticated } = useSelector((state) => state.user)
-  const { isLoading, isSeller, seller } = useSelector((state) => state.seller)
+  const { loading } = useSelector((state) => state.user)
+  const { isLoading} = useSelector((state) => state.seller)
   
   useEffect(() => {
     Store.dispatch(loadUser())
     Store.dispatch(loadSeller())
   }, [])
 
-  // Show loading while checking authentication
   if (loading || isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -48,7 +47,6 @@ const App = () => {
       <Routes>
         <Route path='/' element={<HomePage />} />
         
-        {/* Public routes - redirect if already authenticated */}
         <Route 
           path='/login' 
           element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} 
@@ -79,7 +77,7 @@ const App = () => {
         <Route
           path='/profile'
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} loading={loading}>
+            <ProtectedRoute >
               <ProfilePage />
             </ProtectedRoute>
           }
@@ -88,7 +86,7 @@ const App = () => {
         <Route
           path='/checkout'
           element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} loading={loading}>
+            <ProtectedRoute >
               <CheckoutPage />
             </ProtectedRoute>
           }

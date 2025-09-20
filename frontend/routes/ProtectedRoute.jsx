@@ -1,8 +1,10 @@
 // frontend/src/ProtectedRoute.jsx
 import { Navigate } from "react-router-dom"
+import { useSelector } from 'react-redux'
 
-const ProtectedRoute = ({ isAuthenticated, loading, children }) => {
-  // Show loading while checking authentication
+const ProtectedRoute = ({children }) => {
+   const { loading, isAuthenticated } = useSelector((state) => state.user)
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">

@@ -1,33 +1,50 @@
-const ErrorHandler = require("../utils/errorHandler.js");
-const catchAsyncError = require("./catchAsyncError.js"); // Fixed: Match the actual filename
-const jwt = require("jsonwebtoken");
-const User = require("../model/userModel.js");
-const shopModel = require("../model/shopModel.js");
+// Debug version of the getuser route - add this to your userController.js
 
-exports.isAuthenticated = catchAsyncError(async(req,res,next) => {
-    const {token} = req.cookies;
-
-    if(!token){
-        return next(new ErrorHandler("Please login to continue", 401));
+router.get("/getuser", isAuthenticated, catchAsync(async (req, res, next) => {
+  try {
+    // Add detailed logging
+    console.log("📝 GET /getuser called");
+    console.log("🔍 req.user:", req.user);
+    console.log("🆔 req.user type:", typeof req.user);
+    
+    if (!req.user) {
+      console.log("❌ No req.user found");
+      return next(new ErrorHandler("No user found in request", 401));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    console.log("🔑 req.user._id:", req.user._id);
+    console.log("🔑 req.user.id:", req.user.id);
 
-    req.user = await User.findById(decoded.id);
-
-    next();
-});
-
-exports.isSeller = catchAsyncError(async(req,res,next) => {
-    const {seller_token} = req.cookies;
-
-    if(!seller_token){
-        return next(new ErrorHandler("Please login to continue", 401));
+    // Try different approaches to get user ID
+    let userId;
+    if (req.user._id) {
+      userId = req.user._id;
+      console.log("✅ Using req.user._id");
+    } else if (req.user.id) {
+      userId = req.user.id;
+      console.log("✅ Using req.user.id");
+    } else {
+      console.log("❌ No user ID found");
+      return next(new ErrorHandler("No user ID found", 400));
     }
 
-    const decoded = jwt.verify(seller_token, process.env.JWT_SECRET_KEY);
+    console.log("🔍 Looking for user with ID:", userId);
+    const user = await User.findById(userId);
 
-    req.seller = await shopModel.findById(decoded.id);
+    if (!user) {
+      console.log("❌ User not found in database");
+      return next(new ErrorHandler("User doesn't exist", 400));
+    }
 
-    next();
-});
+    console.log("✅ User found:", user.name, user.email);
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("❌ Get user error:", error);
+    console.error("❌ Error stack:", error.stack);
+    return next(new ErrorHandler(error.message, 500));
+  }
+}));
