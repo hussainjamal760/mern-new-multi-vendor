@@ -26,6 +26,7 @@ import SellerProtected from '../routes/SellerProtected'
 import ShopHomePage from './pages/ShopHomePage'
 import ShopDashboardPage from './pages/ShopDashboardPage'
 import ShopCreateProduct from './pages/ShopCreateProduct'
+import ShopAllProducts from './pages/ShopAllProducts'
 
 const App = () => {
   const { loading, isAuthenticated, user } = useSelector((state) => state.user)
@@ -129,6 +130,15 @@ const App = () => {
           element={
             <SellerProtected>
               <ShopCreateProduct />
+            </SellerProtected>
+          }
+           />
+
+                 <Route
+          path='/dashboard-products'
+          element={
+            <SellerProtected>
+              <ShopAllProducts />
             </SellerProtected>
           }
            />

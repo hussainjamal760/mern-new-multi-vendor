@@ -8,7 +8,6 @@ export const createProduct = (newForm) => async (dispatch) => {
       type: "productCreateRequest",
     });
 
-    console.log("🚀 Redux: Creating product...");
 
     const config = { 
       headers: { 
@@ -23,7 +22,6 @@ export const createProduct = (newForm) => async (dispatch) => {
       config
     );
 
-    console.log("✅ Redux: Product created successfully:", data);
 
     dispatch({
       type: "productCreateSuccess",
@@ -33,7 +31,6 @@ export const createProduct = (newForm) => async (dispatch) => {
     return data; // ✅ Return data for component to use
 
   } catch (error) {
-    console.error("❌ Redux: Product creation failed:", error);
     
     let errorMessage = "Product creation failed";
     
@@ -59,4 +56,68 @@ export const clearErrors = () => async (dispatch) => {
   dispatch({
     type: "clearErrors",
   });
+};
+
+export const getAllProductsShop = (id) =>async (dispatch)=>{
+  try {
+    dispatch({
+      type:"getAllProductsShopRequest",
+    })
+    const {data} = await axios.get(`${server}/product/get-all-products-shop/${id}`)
+
+     dispatch({
+      type:"getAllProductsShopSuccess",
+      payload:data.product,
+    })
+
+  } catch (error) {
+    dispatch({
+      type:"getAllProductsShopFailed",
+      payload:error.response.data.message
+    })
+  }
+}
+
+export const deleteProduct = (id) => async (dispatch) => {
+  try {
+    dispatch({
+      type: "deleteProductRequest",
+    });
+
+    const { data } = await axios.delete(
+      `${server}/product/delete-shop-product/${id}`,
+      {
+        withCredentials: true,
+      }
+    );
+
+    dispatch({
+      type: "deleteProductSuccess",
+      payload: data.message,
+    });
+  } catch (error) {
+    dispatch({
+      type: "deleteProductFailed",
+      payload: error.response.data.message,
+    });
+  }
+};
+
+export const getAllProducts = () => async (dispatch) => {
+  try {
+    dispatch({
+      type: "getAllProductsRequest",
+    });
+
+    const { data } = await axios.get(`${server}/product/get-all-products`);
+    dispatch({
+      type: "getAllProductsSuccess",
+      payload: data.products,
+    });
+  } catch (error) {
+    dispatch({
+      type: "getAllProductsFailed",
+      payload: error.response.data.message,
+    });
+  }
 };
