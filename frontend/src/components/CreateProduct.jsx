@@ -4,9 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { categoriesData } from "../static/data";
 import { AiOutlinePlusCircle } from "react-icons/ai";
+import { useEffect } from "react";
+import {toast} from "react-toastify"
+import { createProduct } from "../redux/actions/product";
 
 const CreateProduct = () => {
   const { seller } = useSelector((state) => state.seller);
+  const {success , error} = useSelector((state)=>state.product)
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -19,22 +23,43 @@ const CreateProduct = () => {
   const [discountPrice, setDiscountPrice] = useState();
   const [stock, setStock] = useState();
 
+    useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+    if (success) {
+      toast.success("Product created successfully!");
+      navigate("/dashboard");
+      window.location.reload();
+    }
+  }, [dispatch, error, success]);
+
+
   const handleImageChange = (e) => {
+    e.preventDefault()
     const files = Array.from(e.target.files);
-    setImages([]);
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (reader.readyState === 2) {
-          setImages((old) => [...old, reader.result]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    setImages((prevImages)=>[...prevImages , ...files])
+    
   };
 
-  const handleSubmit = (e) => {
+    const handleSubmit = (e) => {
     e.preventDefault();
+
+    const newForm = new FormData();
+
+    images.forEach((image) => {
+      newForm.set("images", image);
+    });
+    newForm.append("name", name);
+    newForm.append("description", description);
+    newForm.append("category", category);
+    newForm.append("tags", tags);
+    newForm.append("originalPrice", originalPrice);
+    newForm.append("discountPrice", discountPrice);
+    newForm.append("stock", stock);
+    newForm.append("shopId", seller._id);
+    dispatch(
+      createProduct(newForm))
   };
 
   return (
