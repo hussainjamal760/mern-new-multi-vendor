@@ -54,7 +54,7 @@ export const createProduct = (newForm) => async (dispatch) => {
   }
 };
 
-// ✅ ADD: Clear errors action
+// ✅ IMPROVED: Clear all product states
 export const clearErrors = () => async (dispatch) => {
   dispatch({
     type: "clearErrors",

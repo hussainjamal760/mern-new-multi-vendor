@@ -278,7 +278,7 @@ const ShopCreatePage = () => {
           <div className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link
-              to="/login-shop"
+              to="/shop-login"
               className={`text-blue-600 font-medium hover:underline ${
                 loading ? "pointer-events-none opacity-50" : ""
               }`}

@@ -40,10 +40,11 @@ const CreateProduct = () => {
       setStock("");
       setImages([]);
       
-      // Navigate to dashboard
+      // ✅ FIXED: Clear success state and navigate properly
       setTimeout(() => {
+        dispatch(clearErrors()); // This should also clear success state
         navigate("/dashboard");
-      }, 1000);
+      }, 2000);
     }
   }, [dispatch, error, success, navigate]);
 

@@ -6,10 +6,12 @@ import styles from '../styles/styles'
 
 const ShopInfo = ({isOwner}) => {
     const {seller} = useSelector((state)=>state.seller)
-
+    
     const logoutHandler =() =>{
-        
+        console.log(`${backend_url}${seller?.avatar}`);
+
     }
+    
 
     return(
     <>
