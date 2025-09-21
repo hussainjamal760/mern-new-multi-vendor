@@ -1,4 +1,4 @@
-// CreateProduct.jsx
+// CreateProduct.jsx - FIXED VERSION
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +6,7 @@ import { categoriesData } from "../static/data";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useEffect } from "react";
 import {toast} from "react-toastify"
-import { createProduct } from "../redux/actions/product";
+import { createProduct, clearErrors } from "../redux/actions/product";
 
 const CreateProduct = () => {
   const { seller } = useSelector((state) => state.seller);
@@ -19,47 +19,102 @@ const CreateProduct = () => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState("");
-  const [originalPrice, setOriginalPrice] = useState();
-  const [discountPrice, setDiscountPrice] = useState();
-  const [stock, setStock] = useState();
+  const [originalPrice, setOriginalPrice] = useState(""); // ✅ Fixed: Use empty string instead of undefined
+  const [discountPrice, setDiscountPrice] = useState(""); // ✅ Fixed: Use empty string instead of undefined  
+  const [stock, setStock] = useState(""); // ✅ Fixed: Use empty string instead of undefined
 
-    useEffect(() => {
+  useEffect(() => {
     if (error) {
       toast.error(error);
+      dispatch(clearErrors());
     }
     if (success) {
       toast.success("Product created successfully!");
-      navigate("/dashboard");
-      window.location.reload();
+      // Reset form
+      setName("");
+      setDescription("");
+      setCategory("");
+      setTags("");
+      setOriginalPrice("");
+      setDiscountPrice("");
+      setStock("");
+      setImages([]);
+      
+      // Navigate to dashboard
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1000);
     }
-  }, [dispatch, error, success]);
+  }, [dispatch, error, success, navigate]);
 
-
+  // ✅ FIXED: Handle image selection properly
   const handleImageChange = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     const files = Array.from(e.target.files);
-    setImages((prevImages)=>[...prevImages , ...files])
     
+    // Add new files to existing images array
+    setImages((prevImages) => [...prevImages, ...files]);
   };
 
-    const handleSubmit = (e) => {
+  // ✅ FIXED: Handle form submission with proper FormData
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    console.log("🔍 Seller from Redux:", seller);
+    console.log("🔍 Seller type:", typeof seller);
+
+    // Basic validation
+    if (!name || !description || !category || !discountPrice || !stock) {
+      toast.error("Please fill in all required fields!");
+      return;
+    }
+
+    if (images.length === 0) {
+      toast.error("Please upload at least one product image!");
+      return;
+    }
+
+    // ✅ Handle seller ID properly
+    let sellerId;
+    if (typeof seller === 'string') {
+      sellerId = seller;
+    } else if (seller && seller._id) {
+      sellerId = seller._id;
+    } else {
+      toast.error("Seller information not found. Please login again.");
+      return;
+    }
+
+    console.log("🏪 Using seller ID:", sellerId);
 
     const newForm = new FormData();
 
+    // ✅ FIXED: Append all images with the same key name
     images.forEach((image) => {
-      newForm.set("images", image);
+      newForm.append("images", image);
     });
+    
     newForm.append("name", name);
     newForm.append("description", description);
     newForm.append("category", category);
     newForm.append("tags", tags);
-    newForm.append("originalPrice", originalPrice);
+    newForm.append("originalPrice", originalPrice || "0");
     newForm.append("discountPrice", discountPrice);
     newForm.append("stock", stock);
-    newForm.append("shopId", seller._id);
-    dispatch(
-      createProduct(newForm))
+    newForm.append("shopId", sellerId);
+    
+    // ✅ Debug: Log FormData contents
+    for (let pair of newForm.entries()) {
+      console.log("📋 FormData:", pair[0], pair[1]);
+    }
+    
+    console.log("📤 Submitting product with images:", images.length);
+    dispatch(createProduct(newForm));
+  };
+
+  // ✅ FIXED: Remove image function
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
   };
 
   return (
@@ -80,6 +135,7 @@ const CreateProduct = () => {
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter your product name..."
             className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
+            required
           />
         </div>
 
@@ -94,6 +150,7 @@ const CreateProduct = () => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter your product description..."
             className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
+            required
           ></textarea>
         </div>
 
@@ -106,6 +163,7 @@ const CreateProduct = () => {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
+            required
           >
             <option value="">Choose a category</option>
             {categoriesData &&
@@ -156,6 +214,7 @@ const CreateProduct = () => {
               onChange={(e) => setDiscountPrice(e.target.value)}
               placeholder="Enter discounted price..."
               className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
+              required
             />
           </div>
 
@@ -169,6 +228,7 @@ const CreateProduct = () => {
               onChange={(e) => setStock(e.target.value)}
               placeholder="Enter stock..."
               className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
+              required
             />
           </div>
         </div>
@@ -183,36 +243,52 @@ const CreateProduct = () => {
             id="upload"
             className="hidden"
             multiple
+            accept="image/*"
             onChange={handleImageChange}
           />
           <div className="flex flex-wrap items-center gap-3 mt-3">
             <label
               htmlFor="upload"
-              className="cursor-pointer flex items-center justify-center w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500"
+              className="cursor-pointer flex items-center justify-center w-24 h-24 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors"
             >
               <AiOutlinePlusCircle size={30} className="text-gray-500" />
             </label>
+            
+            {/* ✅ FIXED: Proper image preview */}
             {images &&
-              images.map((i, idx) => (
+              images.map((image, idx) => (
                 <div
                   key={idx}
-                  className="relative w-24 h-24 rounded-lg overflow-hidden shadow-md"
+                  className="relative w-24 h-24 rounded-lg overflow-hidden shadow-md group"
                 >
                   <img
-                    src={i}
-                    alt="preview"
+                    src={URL.createObjectURL(image)}
+                    alt={`preview-${idx}`}
                     className="w-full h-full object-cover"
                   />
+                  {/* Remove button */}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
           </div>
+          {images.length > 0 && (
+            <p className="text-sm text-gray-500 mt-2">
+              {images.length} image(s) selected
+            </p>
+          )}
         </div>
 
         {/* Submit */}
         <div>
           <button
             type="submit"
-            className="w-full py-2 mt-4 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition"
+            className="w-full py-2 mt-4 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             Create Product
           </button>

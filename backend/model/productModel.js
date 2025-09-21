@@ -1,4 +1,4 @@
-
+// backend/model/productModel.js - COMPLETELY FIXED VERSION
 const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
@@ -16,9 +16,11 @@ const productSchema = new mongoose.Schema({
   },
   tags: {
     type: String,
+    default: "",
   },
   originalPrice: {
     type: Number,
+    default: 0,
   },
   discountPrice: {
     type: Number,
@@ -28,41 +30,17 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: [true, "Please enter your product stock!"],
   },
-  images: [
-    {
-      public_id: {
-        type: String,
-        required: true,
+  // ✅ COMPLETELY FIXED: Simple array of strings for now
+  images: {
+    type: [String],
+    required: [true, "Please upload at least one image!"],
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0;
       },
-      url: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
-//   reviews: [
-//     {
-//       user: {
-//         type: Object,
-//       },
-//       rating: {
-//         type: Number,
-//       },
-//       comment: {
-//         type: String,
-//       },
-//       productId: {
-//         type: String,
-//       },
-//       createdAt:{
-//         type: Date,
-//         default: Date.now(),
-//       }
-//     },
-//   ],
-//   ratings: {
-//     type: Number,
-//   },
+      message: "At least one image is required!"
+    }
+  },
   shopId: {
     type: String,
     required: true,
