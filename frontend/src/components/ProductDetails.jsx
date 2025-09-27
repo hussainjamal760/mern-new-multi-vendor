@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai'
 import { Link } from 'react-router-dom'
 import styles from '../styles/styles'
@@ -9,6 +9,10 @@ const ProductDetails = ({ data }) => {
   const [select, setSelect] = useState(0)
   const [liked, setLiked] = useState(false) // heart state
   const navigate = useNavigate()
+
+  
+const { name } = useParams();
+console.log("🆔 Product ID from URL:", name);
 
   return (
     <div className="bg-white">

@@ -8,8 +8,6 @@ const ErrorHandler = require("../utils/errorHandler");
 const { upload } = require("../multer");
 const { isSeller } = require("../middleware/auth");
 
-
-
 router.post(
   "/create-product",
   upload.array("images"),
@@ -18,11 +16,6 @@ router.post(
       console.log("📝 Creating product...");
       console.log("📄 Request body:", req.body);
       console.log("📷 Files received:", req.files?.length || 0);
-      console.log("🔍 Files details:", req.files?.map(f => ({ 
-        filename: f.filename, 
-        size: f.size, 
-        mimetype: f.mimetype 
-      })));
 
       const shopId = req.body.shopId;
       console.log("🏪 Shop ID:", shopId);
@@ -38,7 +31,8 @@ router.post(
         return next(new ErrorHandler("Please upload at least one product image!", 400));
       }
 
-   
+      // ✅ FIXED: Create imageUrls array from uploaded files
+      const imageUrls = req.files.map(file => file.filename);
       console.log("🖼️ Image filenames:", imageUrls);
 
       // Validate required fields
@@ -57,7 +51,7 @@ router.post(
         stock: Number(req.body.stock),
         shopId: shopId,
         shop: shop,
-        images: imageUrls // ✅ Simple array of strings
+        images: imageUrls
       };
 
       const product = await Product.create(productData);
@@ -69,7 +63,8 @@ router.post(
       });
 
     } catch (error) {
-   
+      console.error("❌ Product creation error:", error);
+      
       // Handle validation errors specifically
       if (error.name === 'ValidationError') {
         const messages = Object.values(error.errors).map(err => err.message);
@@ -81,14 +76,44 @@ router.post(
   })
 );
 
-// ✅ ADD: Get all products for a shop
+// ✅ Get all products for a shop
 router.get("/get-all-products-shop/:id", catchAsync(async (req, res, next) => {
   try {
-    const products = await Product.find({ shopId: req.params.id });
+    console.log("🔍 Getting products for shop:", req.params.id);
+    
+    const products = await Product.find({ shopId: req.params.id }).sort({ createdAt: -1 });
+    
+    console.log("📦 Found products:", products.length);
 
     res.status(200).json({
       success: true,
-      products,
+      products, // ✅ Make sure this matches frontend expectation
+    });
+  } catch (error) {
+    console.error("❌ Get products error:", error);
+    return next(new ErrorHandler(error.message, 400));
+  }
+}));
+
+// ✅ ADD: Delete product endpoint
+router.delete("/delete-shop-product/:id", isSeller, catchAsync(async (req, res, next) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return next(new ErrorHandler("Product not found!", 404));
+    }
+
+    // Check if the product belongs to the seller
+    if (product.shopId !== req.seller._id.toString()) {
+      return next(new ErrorHandler("You can only delete your own products!", 403));
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Product deleted successfully!",
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));

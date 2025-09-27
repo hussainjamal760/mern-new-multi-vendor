@@ -58,25 +58,34 @@ export const clearErrors = () => async (dispatch) => {
   });
 };
 
-export const getAllProductsShop = (id) =>async (dispatch)=>{
+// frontend/src/redux/actions/product.js - FIXED getAllProductsShop
+export const getAllProductsShop = (id) => async (dispatch) => {
   try {
     dispatch({
-      type:"getAllProductsShopRequest",
-    })
-    const {data} = await axios.get(`${server}/product/get-all-products-shop/${id}`)
+      type: "getAllProductsShopRequest",
+    });
+    
+    console.log('🔍 Fetching products for shop:', id);
+    
+    const { data } = await axios.get(`${server}/product/get-all-products-shop/${id}`, {
+      withCredentials: true, // Add this for authentication
+    });
 
-     dispatch({
-      type:"getAllProductsShopSuccess",
-      payload:data.product,
-    })
+    console.log('📦 Products response:', data);
+
+    dispatch({
+      type: "getAllProductsShopSuccess",
+      payload: data.products, // ✅ FIXED: Use data.products, not data.product
+    });
 
   } catch (error) {
+    console.error('❌ Get products error:', error);
     dispatch({
-      type:"getAllProductsShopFailed",
-      payload:error.response.data.message
-    })
+      type: "getAllProductsShopFailed",
+      payload: error.response?.data?.message || 'Failed to fetch products'
+    });
   }
-}
+};
 
 export const deleteProduct = (id) => async (dispatch) => {
   try {
