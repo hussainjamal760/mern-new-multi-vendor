@@ -34,6 +34,11 @@ const AllProducts = () => {
     }
   };
 
+  // Helper function to format product name for URL
+  const formatProductName = (name) => {
+    return name.replace(/\s+/g, "-");
+  };
+
   if (isLoading) {
     return (
       <div className="w-full mx-8 pt-1 mt-10 bg-white p-4 rounded-lg shadow-md">
@@ -78,13 +83,16 @@ const AllProducts = () => {
                 >
                   <td className="p-3 border">{item._id}</td>
                   <td className="p-3 border">{item.name}</td>
-                  <td className="p-3 border">US$ {item.discountPrice}</td>
+                  <td className="p-3 border">
+                    US$ {item.discountPrice || item.discount_price}
+                  </td>
                   <td className="p-3 border">{item.stock}</td>
                   <td className="p-3 border">{item?.sold_out || 0}</td>
                   <td className="p-3 border text-center">
                     <Link
-                      to={`/product/${item.name}`}
+                      to={`/product/${formatProductName(item.name)}`}
                       className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                      title={`View ${item.name}`}
                     >
                       <AiOutlineEye size={18} />
                     </Link>
@@ -93,6 +101,7 @@ const AllProducts = () => {
                     <button
                       onClick={() => handleDelete(item._id)}
                       className="inline-flex items-center justify-center p-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                      title={`Delete ${item.name}`}
                     >
                       <AiOutlineDelete size={18} />
                     </button>
