@@ -1,10 +1,11 @@
 const express = require("express")
 const dotenv = require("dotenv")
-const ErrorHandler = require("./utils/ErrorHandler.js")
+const ErrorHandler = require("./utils/errorHandler.js")
 const cookieParser = require("cookie-parser")
 const userController = require("./controllers/userController.js")
 const shopController = require("./controllers/shopController.js")
 const productController = require("./controllers/productController.js")
+const eventController = require("./controllers/eventController.js")
 const cors = require("cors")
 const app = express()
 const errorMiddleware = require("./middleware/error.js")
@@ -35,6 +36,7 @@ app.use("/", express.static("uploads"))
 app.use("/api/v2/user", userController)
 app.use("/api/v2/shop", shopController)
 app.use("/api/v2/product", productController)
+app.use("/api/v2/event", eventController)
 
 // Test route
 app.get("/", (req, res) => {

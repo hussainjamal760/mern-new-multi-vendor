@@ -27,6 +27,7 @@ import ShopHomePage from './pages/ShopHomePage'
 import ShopDashboardPage from './pages/ShopDashboardPage'
 import ShopCreateProduct from './pages/ShopCreateProduct'
 import ShopAllProducts from './pages/ShopAllProducts'
+import ShopCreateEvents from './pages/ShopCreateEvents'
 
 const App = () => {
   const { loading, isAuthenticated, user } = useSelector((state) => state.user)
@@ -143,6 +144,15 @@ const App = () => {
           }
            />
         {/* Fallback route */}
+
+             <Route
+          path='/dashboard-create-event'
+          element={
+            <SellerProtected>
+              <ShopCreateEvents />
+            </SellerProtected>
+          }
+           />
       </Routes>
 
       <ToastContainer
