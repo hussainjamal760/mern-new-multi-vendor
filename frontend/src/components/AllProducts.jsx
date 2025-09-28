@@ -70,7 +70,7 @@ const AllProducts = () => {
               <th className="p-3 border">Price</th>
               <th className="p-3 border">Stock</th>
               <th className="p-3 border">Sold Out</th>
-              <th className="p-3 border">Preview</th>
+              {/* <th className="p-3 border">Preview</th> */}
               <th className="p-3 border">Delete</th>
             </tr>
           </thead>
@@ -88,15 +88,17 @@ const AllProducts = () => {
                   </td>
                   <td className="p-3 border">{item.stock}</td>
                   <td className="p-3 border">{item?.sold_out || 0}</td>
+                    {/*
                   <td className="p-3 border text-center">
-                    <Link
+                     <Link
                       to={`/product/${formatProductName(item.name)}`}
                       className="inline-flex items-center justify-center p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                       title={`View ${item.name}`}
                     >
                       <AiOutlineEye size={18} />
-                    </Link>
+                    </Link> 
                   </td>
+                    */}
                   <td className="p-3 border text-center">
                     <button
                       onClick={() => handleDelete(item._id)}

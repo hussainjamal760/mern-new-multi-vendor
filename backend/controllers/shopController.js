@@ -10,7 +10,7 @@ const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail.js");
 const sendToken = require("../utils/jwtToken.js");
 const SendShopToken = require("../utils/SendShopToken.js");
-const { isSeller } = require("../middleware/auth.js"); // Add missing import
+const { isSeller, isAuthenticated } = require("../middleware/auth.js"); // Add missing import
 
 const router = express.Router();
 
@@ -203,5 +203,23 @@ router.get("/logout", isSeller, catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler(error.message, 500));
   }
 }));
+
+router.get("/logout", isSeller, catchAsyncErrors(async (req, res, next) => {
+  try {
+    res.cookie("seller_token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      sameSite: 'lax' 
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+}));
+
 
 module.exports = router;

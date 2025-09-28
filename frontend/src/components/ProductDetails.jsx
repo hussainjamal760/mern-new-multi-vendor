@@ -86,7 +86,6 @@ const ProductDetails = ({ data }) => {
       images = defaultImages;
     }
 
-    console.log('🎯 Final processed images:', images);
     return images;
   };
 
@@ -131,15 +130,6 @@ const ProductDetails = ({ data }) => {
   const shopData = getShopData(data);
   const priceData = getPrice(data);
 
-  console.log('🔍 Debug info:', {
-    hasData: !!data,
-    dataKeys: data ? Object.keys(data) : [],
-    imagesCount: images.length,
-    firstImageUrl: images[0]?.url,
-    selectedIndex: select,
-    shopData,
-    priceData
-  });
 
   return (
     <div className="bg-white">
@@ -149,14 +139,7 @@ const ProductDetails = ({ data }) => {
           {/* LEFT: Product Images */}
           <div className="w-full 800px:w-[45%] flex flex-col items-start">
             <div className="w-full border rounded-lg shadow-md p-3 bg-gray-50">
-              {/* Debug info */}
-              <div className="mb-2 p-2 bg-yellow-100 text-xs rounded">
-                <p><strong>Image URL:</strong> {images[select]?.url || 'No URL'}</p>
-                <p><strong>Total Images:</strong> {images.length}</p>
-                <p><strong>Selected Index:</strong> {select}</p>
-                <p><strong>Data Source:</strong> {data.images ? 'backend' : 'static'}</p>
-              </div>
-              
+            
               <img
                 src={images[select]?.url || 'https://via.placeholder.com/400x400?text=Loading...'}
                 alt={data.name || 'Product'}
