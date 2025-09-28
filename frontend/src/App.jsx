@@ -28,6 +28,8 @@ import ShopDashboardPage from './pages/ShopDashboardPage'
 import ShopCreateProduct from './pages/ShopCreateProduct'
 import ShopAllProducts from './pages/ShopAllProducts'
 import ShopCreateEvents from './pages/ShopCreateEvents'
+import ShopAllEvents from './pages/ShopAllEvents'
+import CreateEvent from './components/CreateEvent'
 
 const App = () => {
   const { loading, isAuthenticated, user } = useSelector((state) => state.user)
@@ -146,10 +148,20 @@ const App = () => {
         {/* Fallback route */}
 
              <Route
+          path='/dashboard-events'
+          element={
+            <SellerProtected>
+              <ShopAllEvents />
+            </SellerProtected>
+          }
+           />
+
+           
+             <Route
           path='/dashboard-create-event'
           element={
             <SellerProtected>
-              <ShopCreateEvents />
+              <ShopCreateEvents/>
             </SellerProtected>
           }
            />

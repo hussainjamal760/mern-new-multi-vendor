@@ -1,17 +1,15 @@
-// .jsx - FIXED VERSION
-import React, { useState } from "react";
+// CreateEvent.jsx - FIXED VERSION
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { categoriesData } from "../static/data";
 import { AiOutlinePlusCircle } from "react-icons/ai";
-import { useEffect } from "react";
-import {toast} from "react-toastify"
-import { createEvent } from "../redux/actions/event";
-
+import { toast } from "react-toastify";
+import { createEvent, clearErrors } from "../redux/actions/event";
 
 const CreateEvent = () => {
   const { seller } = useSelector((state) => state.seller);
-  const {success , error} = useSelector((state)=>state.event)
+  const { success, error } = useSelector((state) => state.event);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -20,32 +18,34 @@ const CreateEvent = () => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [tags, setTags] = useState("");
-  const [originalPrice, setOriginalPrice] = useState(""); // ✅ Fixed: Use empty string instead of undefined
-  const [discountPrice, setDiscountPrice] = useState(""); // ✅ Fixed: Use empty string instead of undefined  
-  const [stock, setStock] = useState(""); // ✅ Fixed: Use empty string instead of undefined
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(null)
+  const [originalPrice, setOriginalPrice] = useState("");
+  const [discountPrice, setDiscountPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
-  const handleStartDateChange=(e)=>{
-    const startDate = new Date(e.target.value)
-    const minEndDate = new Date(startDate.getTime() + 3 * 24*60*60)
-    setStartDate(startDate)
-    setEndDate(null)
-    document.getElementById("end-date").min =minEndDate.toISOString().slice(0,10);
-  }
+  const handleStartDateChange = (e) => {
+    const startDate = new Date(e.target.value);
+    const minEndDate = new Date(startDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+    setStartDate(startDate);
+    setEndDate(null);
+    document.getElementById("end-date").min = minEndDate.toISOString().slice(0, 10);
+  };
 
+  const handleEndDateChange = (e) => {
+    const endDate = new Date(e.target.value);
+    setEndDate(endDate);
+  };
 
-  const handleEndDateChange=(e)=>{
-    const endDate = new Date(e.target.value)
-    setEndDate(endDate)
-  }
-
-  const today = new Date().toISOString().slice(0,10)
-  const minEndDate = startDate ? new Date(startDate.getTime() + 3 *24*60*60*1000).toISOString().slice(0,10) : today;
+  const today = new Date().toISOString().slice(0, 10);
+  const minEndDate = startDate
+    ? new Date(startDate.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    : today;
 
   useEffect(() => {
     if (error) {
       toast.error(error);
+      dispatch(clearErrors());
     }
     if (success) {
       toast.success("Event created successfully!");
@@ -58,32 +58,33 @@ const CreateEvent = () => {
       setDiscountPrice("");
       setStock("");
       setImages([]);
+      setStartDate(null);
+      setEndDate(null);
       
-      // ✅ FIXED: Clear success state and navigate properly
       setTimeout(() => {
-        dispatch(clearErrors()); // This should also clear success state
-        navigate("/dashboard-event");
+        dispatch(clearErrors());
+        navigate("/dashboard-events");
       }, 2000);
     }
   }, [dispatch, error, success, navigate]);
 
-  // ✅ FIXED: Handle image selection properly
   const handleImageChange = (e) => {
     e.preventDefault();
     const files = Array.from(e.target.files);
-    
-    // Add new files to existing images array
     setImages((prevImages) => [...prevImages, ...files]);
   };
 
-  // ✅ FIXED: Handle form submission with proper FormData
   const handleSubmit = (e) => {
     e.preventDefault();
 
-
     // Basic validation
-    if (!name || !description || !category || !discountPrice || !startDate || !endDate) {
+    if (!name || !description || !category || !discountPrice || !stock) {
       toast.error("Please fill in all required fields!");
+      return;
+    }
+
+    if (!startDate || !endDate) {
+      toast.error("Please select both start and end dates!");
       return;
     }
 
@@ -92,7 +93,7 @@ const CreateEvent = () => {
       return;
     }
 
-    // ✅ Handle seller ID properly
+    // Handle seller ID properly
     let sellerId;
     if (typeof seller === 'string') {
       sellerId = seller;
@@ -103,13 +104,16 @@ const CreateEvent = () => {
       return;
     }
 
+    console.log("✅ Validation passed, creating FormData...");
+
     const newForm = new FormData();
 
-    // ✅ FIXED: Append all images with the same key name
+    // Append all images
     images.forEach((image) => {
       newForm.append("images", image);
     });
     
+    // Append all form data
     newForm.append("name", name);
     newForm.append("description", description);
     newForm.append("category", category);
@@ -118,13 +122,17 @@ const CreateEvent = () => {
     newForm.append("discountPrice", discountPrice);
     newForm.append("stock", stock);
     newForm.append("shopId", sellerId);
-    newForm.append("start_Date" , startDate.toISOString())
-    newForm.append("Finish_Date" , endDate.toISOString())
+    newForm.append("start_Date", startDate.toISOString());
+    newForm.append("Finish_Date", endDate.toISOString());
+
+    console.log("📤 FormData contents:");
+    for (let pair of newForm.entries()) {
+      console.log(pair[0], pair[1]);
+    }
     
     dispatch(createEvent(newForm));
   };
 
-  // ✅ FIXED: Remove image function
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
   };
@@ -139,7 +147,7 @@ const CreateEvent = () => {
         {/* Product Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-           Event Product Name <span className="text-red-500">*</span>
+            Event Product Name <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -189,9 +197,7 @@ const CreateEvent = () => {
 
         {/* Tags */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Tags
-          </label>
+          <label className="block text-sm font-medium text-gray-700">Tags</label>
           <input
             type="text"
             value={tags}
@@ -229,7 +235,24 @@ const CreateEvent = () => {
               required
             />
           </div>
-<br />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Stock <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              placeholder="Enter stock..."
+              className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
+              required
+            />
+          </div>
+        </div>
+
+        {/* Date Fields */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Event Start Date <span className="text-red-500">*</span>
@@ -238,15 +261,14 @@ const CreateEvent = () => {
               type="date"
               id="start-date"
               min={today}
-              value={startDate ? startDate.toISOString().slice(0,10) : ""}
+              value={startDate ? startDate.toISOString().slice(0, 10) : ""}
               onChange={handleStartDateChange}
-              placeholder="Enter stock..."
               className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
               required
             />
           </div>
 
-           <div>
+          <div>
             <label className="block text-sm font-medium text-gray-700">
               Event End Date <span className="text-red-500">*</span>
             </label>
@@ -254,9 +276,8 @@ const CreateEvent = () => {
               type="date"
               id="end-date"
               min={minEndDate}
-              value={endDate ? endDate.toISOString().slice(0,10) : ""}
+              value={endDate ? endDate.toISOString().slice(0, 10) : ""}
               onChange={handleEndDateChange}
-              placeholder="Enter stock..."
               className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:ring focus:ring-blue-200 outline-none"
               required
             />
@@ -284,7 +305,6 @@ const CreateEvent = () => {
               <AiOutlinePlusCircle size={30} className="text-gray-500" />
             </label>
             
-            {/* ✅ FIXED: Proper image preview */}
             {images &&
               images.map((image, idx) => (
                 <div
@@ -296,7 +316,6 @@ const CreateEvent = () => {
                     alt={`preview-${idx}`}
                     className="w-full h-full object-cover"
                   />
-                  {/* Remove button */}
                   <button
                     type="button"
                     onClick={() => removeImage(idx)}

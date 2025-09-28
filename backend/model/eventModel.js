@@ -24,7 +24,7 @@ const eventSchema = new mongoose.Schema({
   },
    status:{
     type:String,
-    defaulte: "Running",
+    default: "Running",
   },
   tags: {
     type: String,
