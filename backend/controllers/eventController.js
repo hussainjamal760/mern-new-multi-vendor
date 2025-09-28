@@ -1,3 +1,4 @@
+// backend/controllers/eventController.js - COMPLETE FIX
 const express = require("express");
 const catchAsync = require("../middleware/catchAsyncError");
 const router = express.Router();
@@ -9,7 +10,6 @@ const { isSeller } = require("../middleware/auth");
 
 // Test route to verify the controller is working
 router.get("/test", (req, res) => {
-  console.log("🔍 Event controller test route hit!");
   res.json({
     success: true,
     message: "Event controller is working!",
@@ -18,27 +18,34 @@ router.get("/test", (req, res) => {
   });
 });
 
+// 🧪 TEMPORARY: Test DELETE without auth
+router.delete("/test-delete/:id", (req, res) => {
+  res.json({
+    success: true,
+    message: "Test DELETE route is working!",
+    id: req.params.id
+  });
+});
+
+// 🧪 TEMPORARY: Test DELETE with auth
+router.delete("/test-delete-auth/:id", isSeller, (req, res) => {
+ 
+  res.json({
+    success: true,
+    message: "Test DELETE with auth is working!",
+    id: req.params.id,
+    seller: req.seller?._id
+  });
+});
+
+// Create event
 router.post(
   "/create-event",
   upload.array("images"),
   catchAsync(async (req, res, next) => {
     try {
-      console.log("📝 Creating event...");
-      console.log("📄 Request body:", req.body);
-      console.log("📷 Files received:", req.files?.length || 0);
-
-      // ✅ DETAILED VALIDATION LOGGING
-      console.log("🔍 Field validation:");
-      console.log("- name:", req.body.name ? "✅" : "❌", req.body.name);
-      console.log("- description:", req.body.description ? "✅" : "❌", req.body.description);
-      console.log("- category:", req.body.category ? "✅" : "❌", req.body.category);
-      console.log("- discountPrice:", req.body.discountPrice ? "✅" : "❌", req.body.discountPrice);
-      console.log("- stock:", req.body.stock ? "✅" : "❌", req.body.stock);
-      console.log("- start_Date:", req.body.start_Date ? "✅" : "❌", req.body.start_Date);
-      console.log("- Finish_Date:", req.body.Finish_Date ? "✅" : "❌", req.body.Finish_Date);
 
       const shopId = req.body.shopId;
-      console.log("🏪 Shop ID:", shopId);
 
       // Validate shop exists
       const shop = await Shop.findById(shopId);
@@ -53,9 +60,8 @@ router.post(
 
       // Create imageUrls array from uploaded files
       const imageUrls = req.files.map(file => file.filename);
-      console.log("🖼️ Image filenames:", imageUrls);
 
-      // ✅ IMPROVED: More specific validation messages
+      // Validate required fields
       const missingFields = [];
       if (!req.body.name) missingFields.push("name");
       if (!req.body.description) missingFields.push("description");
@@ -66,7 +72,6 @@ router.post(
       if (!req.body.Finish_Date) missingFields.push("Finish_Date");
 
       if (missingFields.length > 0) {
-        console.log("❌ Missing fields:", missingFields);
         return next(new ErrorHandler(`Missing required fields: ${missingFields.join(', ')}`, 400));
       }
 
@@ -102,11 +107,9 @@ router.post(
         images: imageUrls
       };
 
-      console.log("📦 Event data to be saved:", JSON.stringify(eventData, null, 2));
 
       const event = await Event.create(eventData);
 
-      console.log("✅ Event created successfully:", event._id);
 
       res.status(201).json({
         success: true,
@@ -115,7 +118,6 @@ router.post(
       });
 
     } catch (error) {
-      console.error("❌ Event creation error:", error);
       
       if (error.name === 'ValidationError') {
         const messages = Object.values(error.errors).map(err => err.message);
@@ -131,37 +133,45 @@ router.post(
 // Get all events for a shop
 router.get("/get-all-events-shop/:id", catchAsync(async (req, res, next) => {
   try {
-    console.log("🔍 Getting events for shop:", req.params.id);
     
     const events = await Event.find({ shopId: req.params.id }).sort({ createdAt: -1 });
     
-    console.log("🎉 Found events:", events.length);
 
     res.status(200).json({
       success: true,
       events,
     });
   } catch (error) {
-    console.error("❌ Get events error:", error);
     return next(new ErrorHandler(error.message, 400));
   }
 }));
 
-// ✅ ADD: Delete product endpoint
+// ✅ MAIN DELETE ROUTE - FIXED WITH BETTER LOGGING
 router.delete("/delete-shop-event/:id", isSeller, catchAsync(async (req, res, next) => {
   try {
-    const event = await Event.findById(req.params.id);
+ 
+    const eventId = req.params.id;
+    
+    // Check if event ID is valid
+    if (!eventId) {
+      return next(new ErrorHandler("Event ID is required!", 400));
+    }
+
+    // Find the event
+    const event = await Event.findById(eventId);
 
     if (!event) {
       return next(new ErrorHandler("Event not found!", 404));
     }
 
-    // Check if the product belongs to the seller
+    
     if (event.shopId !== req.seller._id.toString()) {
-      return next(new ErrorHandler("You can only delete your own Event!", 403));
+      return next(new ErrorHandler("You can only delete your own events!", 403));
     }
 
-    await Event.findByIdAndDelete(req.params.id);
+    // Delete the event
+    await Event.findByIdAndDelete(eventId);
+
 
     res.status(200).json({
       success: true,
@@ -171,5 +181,20 @@ router.delete("/delete-shop-event/:id", isSeller, catchAsync(async (req, res, ne
     return next(new ErrorHandler(error.message, 400));
   }
 }));
+
+// Get all events (public endpoint)
+router.get("/get-all-events", catchAsync(async (req, res, next) => {
+  try {
+    const events = await Event.find().sort({ createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      events,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+}));
+
 
 module.exports = router;
