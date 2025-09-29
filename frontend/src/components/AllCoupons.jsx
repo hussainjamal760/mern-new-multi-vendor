@@ -1,4 +1,4 @@
-// frontend/src/components/AllCoupons.jsx - FIXED VERSION
+// frontend/src/components/AllCoupons.jsx - FIXED WITH REDUX
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -7,63 +7,49 @@ import { useDispatch, useSelector } from "react-redux";
 import styles from "../styles/styles";
 import { server } from "../server";
 import { toast } from "react-toastify";
+import { getAllCouponsShop, deleteCoupon } from "../redux/actions/coupons";
 
 const AllCoupons = () => {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [coupouns, setCoupouns] = useState([]);
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [selectedProducts, setSelectedProducts] = useState("");
   const [value, setValue] = useState("");
+  
   const { seller } = useSelector((state) => state.seller);
   const { products } = useSelector((state) => state.product);
+  const { coupons, isLoading, error, success, message } = useSelector((state) => state.coupon);
 
   const dispatch = useDispatch();
 
+  // Fetch coupons when component mounts or seller changes
   useEffect(() => {
-    if (!seller?._id) {
-      console.log("❌ No seller ID found");
-      return;
+    if (seller?._id) {
+      console.log("🔍 Fetching coupons for seller:", seller._id);
+      dispatch(getAllCouponsShop(seller._id));
     }
-    
-    console.log("🔍 Fetching coupons for seller:", seller._id);
-    setIsLoading(true);
-    
-    axios
-      .get(`${server}/copoun/get-coupon/${seller._id}`, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        console.log("✅ Coupons fetched:", res.data);
-        setIsLoading(false);
-        setCoupouns(res.data.couponCodes || []);
-      })
-      .catch((error) => {
-        setIsLoading(false);
-        console.error("❌ Error fetching coupons:", error);
-        console.error("❌ Error response:", error.response?.data);
-        toast.error(error.response?.data?.message || "Failed to fetch coupons");
-      });
-  }, [seller?._id]);
+  }, [dispatch, seller?._id]);
+
+  // Handle success/error messages
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch({ type: "clearErrors" });
+    }
+    if (success) {
+      toast.success(message);
+      dispatch({ type: "clearErrors" });
+      // Refresh coupons after delete
+      dispatch(getAllCouponsShop(seller._id));
+    }
+  }, [error, success, message, dispatch, seller?._id]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this coupon?")) return;
     
     console.log("🗑️ Deleting coupon:", id);
-    
-    axios
-      .delete(`${server}/copoun/delete-coupon/${id}`, { withCredentials: true })
-      .then(() => {
-        console.log("✅ Coupon deleted successfully");
-        toast.success("Coupon code deleted successfully!");
-        setCoupouns(coupouns.filter(coupon => coupon._id !== id));
-      })
-      .catch((error) => {
-        console.error("❌ Delete error:", error);
-        toast.error(error.response?.data?.message || "Error deleting coupon!");
-      });
+    dispatch(deleteCoupon(id));
   };
 
   const handleSubmit = async (e) => {
@@ -82,7 +68,7 @@ const AllCoupons = () => {
     const couponData = {
       name: name.trim(),
       value: Number(value),
-      shopId: seller._id.toString(), // Ensure it's a string
+      shopId: seller._id.toString(),
       shop: seller,
     };
 
@@ -108,7 +94,10 @@ const AllCoupons = () => {
 
       console.log("✅ Coupon created:", response.data);
       toast.success("Coupon code created successfully!");
-      setCoupouns([response.data.coupounCode, ...coupouns]);
+      
+      // Refresh coupons list
+      dispatch(getAllCouponsShop(seller._id));
+      
       setOpen(false);
       
       // Reset form
@@ -119,7 +108,6 @@ const AllCoupons = () => {
       setSelectedProducts("");
     } catch (error) {
       console.error("❌ Create coupon error:", error);
-      console.error("❌ Error response:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to create coupon");
     }
   };
@@ -145,14 +133,14 @@ const AllCoupons = () => {
         )}
 
         {/* Empty State */}
-        {!isLoading && coupouns.length === 0 && (
+        {!isLoading && (!coupons || coupons.length === 0) && (
           <div className="w-full text-center py-8">
             <p className="text-gray-500">No coupons found. Create your first coupon!</p>
           </div>
         )}
 
         {/* Coupons Table */}
-        {!isLoading && coupouns.length > 0 && (
+        {!isLoading && coupons && coupons.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-200">
               <thead className="bg-gray-100">
@@ -166,7 +154,7 @@ const AllCoupons = () => {
                 </tr>
               </thead>
               <tbody>
-                {coupouns.map((item) => (
+                {coupons.map((item) => (
                   <tr key={item._id} className="hover:bg-gray-50">
                     <td className="px-4 py-2 border">{item._id}</td>
                     <td className="px-4 py-2 border font-semibold">{item.name}</td>
@@ -281,7 +269,7 @@ const AllCoupons = () => {
                 <div>
                   <button
                     type="submit"
-                    className="mt-2 block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] bg-black text-white cursor-pointer hover:bg-black"
+                    className="mt-2 block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] bg-black text-white cursor-pointer hover:bg-gray-800"
                   >
                     Create Coupon
                   </button>

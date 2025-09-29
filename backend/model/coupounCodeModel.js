@@ -1,24 +1,28 @@
-// backend/model/productModel.js - COMPLETELY FIXED VERSION
+// backend/model/coupounCodeModel.js - FIXED
 const mongoose = require("mongoose");
 
 const couponCodeSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, "Please enter your coupoun code name!"],
+    required: [true, "Please enter your coupon code name!"],
     unique: true,
   },
-  value:{
-    type : Number,
-    required:true,
+  value: {
+    type: Number,
+    required: true,
   },
-  minAmount:{
-    type : Number,
+  minAmount: {
+    type: Number,
   },
-  maxAmount:{
-    type : Number,
+  maxAmount: {
+    type: Number,
   },
-  selectedProduct:{
+  selectedProduct: {
     type: String
+  },
+  shopId: {  // ADD THIS FIELD
+    type: String,
+    required: true,
   },
   shop: {
     type: Object,
