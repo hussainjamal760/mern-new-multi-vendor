@@ -57,8 +57,6 @@ const AllProducts = () => {
       <div className="mb-4 p-2 bg-gray-100 rounded text-sm">
         <p><strong>Seller ID:</strong> {seller?._id || 'Not found'}</p>
         <p><strong>Products Count:</strong> {products?.length || 0}</p>
-        <p><strong>Loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
-        <p><strong>Error:</strong> {error || 'None'}</p>
       </div>
 
       <div className="overflow-x-auto">

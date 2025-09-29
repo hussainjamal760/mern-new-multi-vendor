@@ -27,7 +27,6 @@ const AllEvents = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this event?")) {
       try {
-        console.log("🗑️ Attempting to delete event:", id);
         await dispatch(deleteEvent(id));
         
         // Refresh the events list after successful deletion
@@ -39,7 +38,6 @@ const AllEvents = () => {
         
         toast.success("Event deleted successfully!");
       } catch (error) {
-        console.error("❌ Delete failed:", error);
         toast.error("Failed to delete event. Please try again.");
       }
     }
@@ -63,7 +61,10 @@ const AllEvents = () => {
   return (
     <div className="w-full mx-8 pt-1 mt-10 bg-white p-4 rounded-lg shadow-md">
       <h1 className="text-xl font-bold mb-4">All Events</h1>
-      
+       <div className="mb-4 p-2 bg-gray-100 rounded text-sm">
+        <p><strong>Seller ID:</strong> {seller?._id || 'Not found'}</p>
+        <p><strong>Events Count:</strong> {events?.length || 0}</p>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full border border-gray-300 rounded-lg">
           <thead className="bg-gray-100">

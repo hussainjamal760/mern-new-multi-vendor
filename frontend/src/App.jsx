@@ -29,7 +29,7 @@ import ShopCreateProduct from './pages/ShopCreateProduct'
 import ShopAllProducts from './pages/ShopAllProducts'
 import ShopCreateEvents from './pages/ShopCreateEvents'
 import ShopAllEvents from './pages/ShopAllEvents'
-import CreateEvent from './components/CreateEvent'
+import ShopAllCoupouns from './pages/ShopAllCoupouns'
 
 const App = () => {
   const { loading, isAuthenticated, user } = useSelector((state) => state.user)
@@ -162,6 +162,15 @@ const App = () => {
           element={
             <SellerProtected>
               <ShopCreateEvents/>
+            </SellerProtected>
+          }
+           />
+
+              <Route
+          path='/dashboard-coupouns'
+          element={
+            <SellerProtected>
+              <ShopAllCoupouns/>
             </SellerProtected>
           }
            />
