@@ -1,6 +1,6 @@
 const express = require("express")
 const dotenv = require("dotenv")
-const ErrorHandler = require("./utils/ErrorHandler.js")
+const ErrorHandler = require("./utils/errorHandler.js")
 const cookieParser = require("cookie-parser")
 const userController = require("./controllers/userController.js")
 const shopController = require("./controllers/shopController.js")

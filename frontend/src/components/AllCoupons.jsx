@@ -1,3 +1,4 @@
+// frontend/src/components/AllCoupons.jsx - FIXED VERSION
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -12,66 +13,115 @@ const AllCoupons = () => {
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [coupouns, setCoupouns] = useState([]);
-  const [minAmount, setMinAmout] = useState(null);
-  const [maxAmount, setMaxAmount] = useState(null);
-  const [selectedProducts, setSelectedProducts] = useState(null);
-  const [value, setValue] = useState(null);
+  const [minAmount, setMinAmount] = useState("");
+  const [maxAmount, setMaxAmount] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState("");
+  const [value, setValue] = useState("");
   const { seller } = useSelector((state) => state.seller);
   const { products } = useSelector((state) => state.product);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
+    if (!seller?._id) {
+      console.log("❌ No seller ID found");
+      return;
+    }
+    
+    console.log("🔍 Fetching coupons for seller:", seller._id);
     setIsLoading(true);
+    
     axios
-      .get(`${server}/coupon/get-coupon/${seller._id}`, {
+      .get(`${server}/copoun/get-coupon/${seller._id}`, {
         withCredentials: true,
       })
       .then((res) => {
+        console.log("✅ Coupons fetched:", res.data);
         setIsLoading(false);
-        setCoupouns(res.data.couponCodes);
+        setCoupouns(res.data.couponCodes || []);
       })
-      .catch(() => {
+      .catch((error) => {
         setIsLoading(false);
+        console.error("❌ Error fetching coupons:", error);
+        console.error("❌ Error response:", error.response?.data);
+        toast.error(error.response?.data?.message || "Failed to fetch coupons");
       });
-  }, [dispatch, seller._id]);
+  }, [seller?._id]);
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this coupon?")) return;
+    
+    console.log("🗑️ Deleting coupon:", id);
+    
     axios
-      .delete(`${server}/coupon/delete-coupon/${id}`, { withCredentials: true })
+      .delete(`${server}/copoun/delete-coupon/${id}`, { withCredentials: true })
       .then(() => {
-        toast.success("Coupon code deleted succesfully!");
-        window.location.reload();
+        console.log("✅ Coupon deleted successfully");
+        toast.success("Coupon code deleted successfully!");
+        setCoupouns(coupouns.filter(coupon => coupon._id !== id));
       })
-      .catch(() => {
-        toast.error("Error deleting coupon!");
+      .catch((error) => {
+        console.error("❌ Delete error:", error);
+        toast.error(error.response?.data?.message || "Error deleting coupon!");
       });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios
-      .post(
-        `${server}/coupon/create-coupon-code`,
-        {
-          name,
-          minAmount,
-          maxAmount,
-          selectedProducts,
-          value,
-          shopId: seller._id,
-        },
+    // Validation
+    if (!name.trim()) {
+      toast.error("Please enter coupon name");
+      return;
+    }
+    if (!value || value <= 0) {
+      toast.error("Please enter a valid discount percentage");
+      return;
+    }
+
+    const couponData = {
+      name: name.trim(),
+      value: Number(value),
+      shopId: seller._id.toString(), // Ensure it's a string
+      shop: seller,
+    };
+
+    // Add optional fields only if they have values
+    if (minAmount && Number(minAmount) > 0) {
+      couponData.minAmount = Number(minAmount);
+    }
+    if (maxAmount && Number(maxAmount) > 0) {
+      couponData.maxAmount = Number(maxAmount);
+    }
+    if (selectedProducts) {
+      couponData.selectedProduct = selectedProducts;
+    }
+
+    console.log("📤 Sending coupon data:", couponData);
+
+    try {
+      const response = await axios.post(
+        `${server}/copoun/create-coupon-code`,
+        couponData,
         { withCredentials: true }
-      )
-      .then(() => {
-        toast.success("Coupon code created successfully!");
-        setOpen(false);
-        window.location.reload();
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      });
+      );
+
+      console.log("✅ Coupon created:", response.data);
+      toast.success("Coupon code created successfully!");
+      setCoupouns([response.data.coupounCode, ...coupouns]);
+      setOpen(false);
+      
+      // Reset form
+      setName("");
+      setValue("");
+      setMinAmount("");
+      setMaxAmount("");
+      setSelectedProducts("");
+    } catch (error) {
+      console.error("❌ Create coupon error:", error);
+      console.error("❌ Error response:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to create coupon");
+    }
   };
 
   return (
@@ -87,24 +137,42 @@ const AllCoupons = () => {
           </div>
         </div>
 
-        {/* Static Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-2 border text-left">Id</th>
-                <th className="px-4 py-2 border text-left">Coupon Code</th>
-                <th className="px-4 py-2 border text-left">Value</th>
-                <th className="px-4 py-2 border text-center">Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coupouns &&
-                coupouns.map((item) => (
+        {/* Loading State */}
+        {isLoading && (
+          <div className="w-full text-center py-4">
+            <p>Loading coupons...</p>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && coupouns.length === 0 && (
+          <div className="w-full text-center py-8">
+            <p className="text-gray-500">No coupons found. Create your first coupon!</p>
+          </div>
+        )}
+
+        {/* Coupons Table */}
+        {!isLoading && coupouns.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-2 border text-left">Id</th>
+                  <th className="px-4 py-2 border text-left">Coupon Code</th>
+                  <th className="px-4 py-2 border text-left">Value</th>
+                  <th className="px-4 py-2 border text-left">Min Amount</th>
+                  <th className="px-4 py-2 border text-left">Max Amount</th>
+                  <th className="px-4 py-2 border text-center">Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                {coupouns.map((item) => (
                   <tr key={item._id} className="hover:bg-gray-50">
                     <td className="px-4 py-2 border">{item._id}</td>
-                    <td className="px-4 py-2 border">{item.name}</td>
-                    <td className="px-4 py-2 border">{item.value} %</td>
+                    <td className="px-4 py-2 border font-semibold">{item.name}</td>
+                    <td className="px-4 py-2 border">{item.value}%</td>
+                    <td className="px-4 py-2 border">${item.minAmount || "N/A"}</td>
+                    <td className="px-4 py-2 border">${item.maxAmount || "N/A"}</td>
                     <td className="px-4 py-2 border text-center">
                       <button
                         onClick={() => handleDelete(item._id)}
@@ -115,9 +183,10 @@ const AllCoupons = () => {
                     </td>
                   </tr>
                 ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Create Coupon Modal */}
         {open && (
@@ -131,10 +200,10 @@ const AllCoupons = () => {
                 />
               </div>
               <h5 className="text-[30px] font-Poppins text-center">
-                Create Coupon code
+                Create Coupon Code
               </h5>
 
-              <form onSubmit={handleSubmit} aria-required={true}>
+              <form onSubmit={handleSubmit}>
                 <br />
                 <div>
                   <label className="pb-2">
@@ -156,32 +225,36 @@ const AllCoupons = () => {
                     Discount Percentage <span className="text-red-500">*</span>
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     name="value"
                     value={value}
                     required
+                    min="1"
+                    max="100"
                     className="mt-2 block w-full px-3 h-[35px] border border-gray-300 rounded-[3px]"
                     onChange={(e) => setValue(e.target.value)}
-                    placeholder="Enter your coupon code value..."
+                    placeholder="Enter discount percentage (1-100)..."
                   />
                 </div>
                 <br />
                 <div>
-                  <label className="pb-2">Min Amount</label>
+                  <label className="pb-2">Min Amount (Optional)</label>
                   <input
                     type="number"
                     value={minAmount}
+                    min="0"
                     className="mt-2 block w-full px-3 h-[35px] border border-gray-300 rounded-[3px]"
-                    onChange={(e) => setMinAmout(e.target.value)}
+                    onChange={(e) => setMinAmount(e.target.value)}
                     placeholder="Enter min amount..."
                   />
                 </div>
                 <br />
                 <div>
-                  <label className="pb-2">Max Amount</label>
+                  <label className="pb-2">Max Amount (Optional)</label>
                   <input
                     type="number"
                     value={maxAmount}
+                    min="0"
                     className="mt-2 block w-full px-3 h-[35px] border border-gray-300 rounded-[3px]"
                     onChange={(e) => setMaxAmount(e.target.value)}
                     placeholder="Enter max amount..."
@@ -189,7 +262,7 @@ const AllCoupons = () => {
                 </div>
                 <br />
                 <div>
-                  <label className="pb-2">Selected Product</label>
+                  <label className="pb-2">Selected Product (Optional)</label>
                   <select
                     className="w-full mt-2 border h-[35px] rounded-[5px]"
                     value={selectedProducts}
@@ -206,11 +279,12 @@ const AllCoupons = () => {
                 </div>
                 <br />
                 <div>
-                  <input
+                  <button
                     type="submit"
-                    value="Create"
-                    className="mt-2 block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] bg-blue-500 text-white cursor-pointer"
-                  />
+                    className="mt-2 block w-full px-3 h-[35px] border border-gray-300 rounded-[3px] bg-black text-white cursor-pointer hover:bg-black"
+                  >
+                    Create Coupon
+                  </button>
                 </div>
               </form>
             </div>
