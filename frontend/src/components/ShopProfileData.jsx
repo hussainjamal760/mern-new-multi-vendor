@@ -7,14 +7,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllProductsShop } from '../redux/reducers/product';
 
 const ShopProfileData = ({isOwner}) => {
-    const {products} = useSelector((state)=>state.product);
-    const{id} = useParams()
-    const dispatch = useDispatch()
-    useEffect(()=>{
-      dispatch(getAllProductsShop(id))
-    },[dispatch])
 
+  const {products} = useSelector((state)=> state.product)
+  const {id} = useParams()
+  const dispatch = useDispatch()
+  useEffect(()=>{
+    dispatch(getAllProductsShop(id))
 
+  },[dispatch])
     const [active, setActive] = useState(1)
   return (
     <div className="w-full">
@@ -63,7 +63,7 @@ const ShopProfileData = ({isOwner}) => {
       </div>
 
       <br />
-            {active === 1 && (
+      {active === 1 && (
         <div className="grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3 lg:gap-[25px] xl:grid-cols-4 xl:gap-[20px] mb-12 border-0">
           {products &&
             products.map((i, index) => (
@@ -71,7 +71,6 @@ const ShopProfileData = ({isOwner}) => {
             ))}
         </div>
       )}
-
 
       
      
