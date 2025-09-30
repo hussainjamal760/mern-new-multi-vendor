@@ -30,6 +30,7 @@ import ShopAllProducts from './pages/ShopAllProducts'
 import ShopCreateEvents from './pages/ShopCreateEvents'
 import ShopAllEvents from './pages/ShopAllEvents'
 import ShopAllCoupouns from './pages/ShopAllCoupouns'
+import ShopPreviewPage from './pages/ShopPreviewPage'
 
 const App = () => {
   const { loading, isAuthenticated, user } = useSelector((state) => state.user)
@@ -89,6 +90,7 @@ const App = () => {
         <Route path='/faq' element={<FAQPage />} />
         <Route path='/activation/:activation_token' element={<Activation />} />
         <Route path='/seller/activation/:activation_token' element={<SellerActivationPage />} />
+        <Route path="/shop/preview/:id" element={<ShopPreviewPage />} />
 
         {/* Protected user routes */}
         <Route

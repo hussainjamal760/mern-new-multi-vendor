@@ -1,6 +1,7 @@
 // frontend/src/redux/reducers/product.js - COMPLETE FIXED VERSION
 import { createReducer } from "@reduxjs/toolkit";
-
+import axios from "axios";
+import { server } from "../../server";
 const initialState = {
   isLoading: false,
   product: null,

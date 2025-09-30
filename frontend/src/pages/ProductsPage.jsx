@@ -1,31 +1,33 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import ProductCard from "../components/ProductCard";
 import styles from "../styles/styles";
-import { productData } from "../static/data";
 
 const ProductsPage = () => {
   const [searchParams] = useSearchParams();
   const categoryData = searchParams.get("category");
+  const {allProducts,isLoading} = useSelector((state) => state.products);
   const [data, setData] = useState([]);
 
   useEffect(() => {
     if (categoryData === null) {
-      const d = productData && productData.sort((a,b)=>a.total_sell - b.total_sell);
+      const d = allProducts;
       setData(d);
     } else {
       const d =
-      productData && productData.filter((i) => i.category === categoryData);
+      allProducts && allProducts.filter((i) => i.category === categoryData);
       setData(d);
     }
-       window.scrollTo(0,0);
-  }, []);
+    //    window.scrollTo(0,0);
+  }, [allProducts]);
 
   return (
   <>
- 
+
+      <div>
       <Header activeHeading={3} />
       <br />
       <br />
@@ -40,7 +42,10 @@ const ProductsPage = () => {
         ) : null}
       </div>
       <Footer />
-   
-</>
-)}
+    </div>
+
+  </>
+  );
+};
+
 export default ProductsPage;
